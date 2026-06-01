@@ -14,26 +14,26 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 **Goal:** working deployed app that accepts a treadmill workout entry and shows today's steps on a bar chart. No calculations beyond `distance = speed × hours`. No Apple Health. No styling polish. Pure stack proof.
 
-- [ ] **P0.1** Run `pnpm create next-app olympic-app --typescript --tailwind --app --eslint --src-dir --no-import-alias` in this dir (or in-place if config allows); commit initial scaffold
-- [ ] **P0.2** Initialize git repo, push to GitHub (private)
-- [ ] **P0.3** Install and init shadcn/ui (`pnpm dlx shadcn@latest init`); add components: `button`, `input`, `label`, `card`, `form`, `sonner`
-- [ ] **P0.4** Install Vitest + React Testing Library + jsdom + `@testing-library/jest-dom`; add `test` script; create `vitest.config.ts` and `vitest.setup.ts`
-- [ ] **P0.5** Write smoke test `src/lib/__tests__/smoke.test.ts` asserting `1 + 1 === 2`; run `pnpm test` and verify it passes
-- [ ] **P0.6** Provision Neon Postgres via Vercel Marketplace; link project (`vercel link`, `vercel env pull .env.local`)
-- [ ] **P0.7** Install Drizzle ORM + `drizzle-kit` + `@neondatabase/serverless`; configure `drizzle.config.ts` pointing at `DATABASE_URL`
-- [ ] **P0.8** Define minimal `workout` table in `src/db/schema.ts` — columns: `id`, `start_at`, `end_at`, `minutes`, `speed_mph`, `incline_pct`, `distance_mi`, `created_at`. Generate + apply migration
-- [ ] **P0.9** Write test `src/db/__tests__/workouts.repo.test.ts` for `createWorkout()` and `listWorkouts()` (use a test database URL or transactional rollback)
-- [ ] **P0.10** Implement `src/db/workouts.repo.ts` with `createWorkout()` and `listWorkouts()`; tests pass
-- [ ] **P0.11** Write test `src/app/api/workouts/__tests__/route.test.ts` for `POST /api/workouts` (accepts speed/incline/minutes, returns saved row)
-- [ ] **P0.12** Implement `src/app/api/workouts/route.ts` (POST handler); tests pass
-- [ ] **P0.13** Write test `src/components/__tests__/treadmill-entry-form.test.tsx` — renders fields, submits, calls handler with parsed values
-- [ ] **P0.14** Implement `src/components/treadmill-entry-form.tsx` (shadcn Form, three inputs, Save button); tests pass
-- [ ] **P0.15** Write test `src/lib/__tests__/aggregate-daily.test.ts` for `aggregateDailyMiles(workouts)` (groups by date, sums miles)
-- [ ] **P0.16** Implement `src/lib/aggregate-daily.ts`; tests pass
-- [ ] **P0.17** Build `src/app/page.tsx` (dashboard): renders entry form + a simple Recharts bar chart of last 7 days miles
-- [ ] **P0.18** Enable Vercel deployment protection on the project (dashboard → Settings → Deployment Protection → "Standard Protection")
-- [ ] **P0.19** Deploy: `vercel --prod`; manually log one workout and confirm it renders on the chart
-- [ ] **P0.20** Tag commit `v0.1-vertical-slice`
+- [x] **P0.1** Run `pnpm create next-app olympic-app --typescript --tailwind --app --eslint --src-dir --no-import-alias` in this dir (or in-place if config allows); commit initial scaffold
+- [x] **P0.2** Initialize git repo, push to GitHub (private)
+- [x] **P0.3** Install and init shadcn/ui (`pnpm dlx shadcn@latest init`); add components: `button`, `input`, `label`, `card`, `form`, `sonner`
+- [x] **P0.4** Install Vitest + React Testing Library + jsdom + `@testing-library/jest-dom`; add `test` script; create `vitest.config.ts` and `vitest.setup.ts`
+- [x] **P0.5** Write smoke test `src/lib/__tests__/smoke.test.ts` asserting `1 + 1 === 2`; run `pnpm test` and verify it passes
+- [x] **P0.6** Provision Neon Postgres via Vercel Marketplace; link project (`vercel link`, `vercel env pull .env.local`)
+- [x] **P0.7** Install Drizzle ORM + `drizzle-kit` + `@neondatabase/serverless`; configure `drizzle.config.ts` pointing at `DATABASE_URL`
+- [x] **P0.8** Define minimal `workout` table in `src/db/schema.ts` — columns: `id`, `start_at`, `end_at`, `minutes`, `speed_mph`, `incline_pct`, `distance_mi`, `created_at`. Generate + apply migration
+- [x] **P0.9** Write test `src/db/__tests__/workouts.repo.test.ts` for `createWorkout()` and `listWorkouts()` (use a test database URL or transactional rollback)
+- [x] **P0.10** Implement `src/db/workouts.repo.ts` with `createWorkout()` and `listWorkouts()`; tests pass
+- [x] **P0.11** Write test `src/app/api/workouts/__tests__/route.test.ts` for `POST /api/workouts` (accepts speed/incline/minutes, returns saved row)
+- [x] **P0.12** Implement `src/app/api/workouts/route.ts` (POST handler); tests pass
+- [x] **P0.13** Write test `src/components/__tests__/treadmill-entry-form.test.tsx` — renders fields, submits, calls handler with parsed values
+- [x] **P0.14** Implement `src/components/treadmill-entry-form.tsx` (shadcn Form, three inputs, Save button); tests pass
+- [x] **P0.15** Write test `src/lib/__tests__/aggregate-daily.test.ts` for `aggregateDailyMiles(workouts)` (groups by date, sums miles)
+- [x] **P0.16** Implement `src/lib/aggregate-daily.ts`; tests pass
+- [x] **P0.17** Build `src/app/page.tsx` (dashboard): renders entry form + a simple Recharts bar chart of last 7 days miles
+- [x] **P0.18** Enable Vercel deployment protection on the project (dashboard → Settings → Deployment Protection → "Standard Protection")
+- [x] **P0.19** Deploy: `vercel --prod`; manually log one workout and confirm it renders on the chart
+- [x] **P0.20** Tag commit `v0.1-vertical-slice`
 
 **🎯 Checkpoint:** at this point one entry round-trips through the real stack. Phase 1+ can now parallelize.
 
