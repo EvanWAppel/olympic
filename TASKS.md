@@ -95,14 +95,14 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 > Independent from C — different endpoint, different shape. Touches `daily_metric` and `workout` repos.
 
-- [ ] **D1** Test `POST /api/health/ingest` rejects requests without valid `Authorization: Bearer <secret>`
-- [ ] **D2** Implement bearer-secret middleware/guard checking `settings.health_ingest_secret`
-- [ ] **D3** Test ingest endpoint accepts the Health Auto Export JSON shape (PRD §6.4) and upserts daily_metrics
-- [ ] **D4** Test it also upserts workouts on `external_id`
-- [ ] **D5** Implement `src/app/api/health/ingest/route.ts`
-- [ ] **D6** Add "Health Ingest" section to Settings: show URL, show + regenerate secret, copy-to-clipboard, paste-into-app instructions block
-- [ ] **D7** Test secret regeneration invalidates the old one (old token returns 401 afterward)
-- [ ] **D8** Implement secret rotation endpoint + UI button
+- [x] **D1** Test `POST /api/health/ingest` rejects requests without valid `Authorization: Bearer <secret>`
+- [x] **D2** Implement bearer-secret middleware/guard checking `settings.health_ingest_secret`
+- [x] **D3** Test ingest endpoint accepts the Health Auto Export JSON shape (PRD §6.4) and upserts daily_metrics
+- [x] **D4** Test it also upserts workouts on `external_id`
+- [x] **D5** Implement `src/app/api/health/ingest/route.ts`
+- [x] **D6** Add "Health Ingest" section to Settings: show URL, show + regenerate secret, copy-to-clipboard, paste-into-app instructions block
+- [x] **D7** Test secret regeneration invalidates the old one (old token returns 401 afterward)
+- [x] **D8** Implement secret rotation endpoint + UI button
 
 ---
 

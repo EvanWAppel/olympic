@@ -2,6 +2,7 @@ import Link from "next/link"
 import { getSettings } from "@/db/settings.repo"
 import { SettingsCard } from "@/components/settings-card"
 import { HealthImportCard } from "@/components/health-import-card"
+import { HealthIngestCard } from "@/components/health-ingest-card"
 
 export const dynamic = "force-dynamic"
 
@@ -32,7 +33,7 @@ export default async function SettingsPage() {
 
       <HealthImportCard />
 
-      {/* health ingest card goes here — added in Group D integration */}
+      <HealthIngestCard initialSecret={s.healthIngestSecret} />
     </main>
   )
 }
