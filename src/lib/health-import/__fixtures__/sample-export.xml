@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HealthData [
+<!ELEMENT HealthData (Record|Workout)*>
+]>
+<HealthData locale="en_US">
+  <ExportDate value="2026-05-31 12:00:00 -0500"/>
+
+  <!-- 2026-05-29: three step records totalling 1200 -->
+  <Record type="HKQuantityTypeIdentifierStepCount" unit="count"
+          startDate="2026-05-29 06:00:00 -0500" endDate="2026-05-29 06:15:00 -0500" value="500"/>
+  <Record type="HKQuantityTypeIdentifierStepCount" unit="count"
+          startDate="2026-05-29 12:00:00 -0500" endDate="2026-05-29 12:30:00 -0500" value="400"/>
+  <Record type="HKQuantityTypeIdentifierStepCount" unit="count"
+          startDate="2026-05-29 18:00:00 -0500" endDate="2026-05-29 18:20:00 -0500" value="300"/>
+  <Record type="HKQuantityTypeIdentifierDistanceWalkingRunning" unit="mi"
+          startDate="2026-05-29 06:00:00 -0500" endDate="2026-05-29 18:20:00 -0500" value="0.6"/>
+  <Record type="HKQuantityTypeIdentifierActiveEnergyBurned" unit="kcal"
+          startDate="2026-05-29 06:00:00 -0500" endDate="2026-05-29 18:20:00 -0500" value="45"/>
+
+  <!-- 2026-05-30: 2200 steps; distance in km (1.5 km ≈ 0.9321 mi); calories in two records -->
+  <Record type="HKQuantityTypeIdentifierStepCount" unit="count"
+          startDate="2026-05-30 07:00:00 -0500" endDate="2026-05-30 07:45:00 -0500" value="2200"/>
+  <Record type="HKQuantityTypeIdentifierDistanceWalkingRunning" unit="km"
+          startDate="2026-05-30 07:00:00 -0500" endDate="2026-05-30 07:45:00 -0500" value="1.5"/>
+  <Record type="HKQuantityTypeIdentifierActiveEnergyBurned" unit="kcal"
+          startDate="2026-05-30 07:00:00 -0500" endDate="2026-05-30 07:30:00 -0500" value="120"/>
+  <Record type="HKQuantityTypeIdentifierActiveEnergyBurned" unit="kcal"
+          startDate="2026-05-30 07:30:00 -0500" endDate="2026-05-30 07:45:00 -0500" value="80"/>
+
+  <!-- 2026-05-30 walking workout 7:00–7:45 -->
+  <Workout workoutActivityType="HKWorkoutActivityTypeWalking"
+           duration="45" durationUnit="min"
+           totalDistance="0.9321" totalDistanceUnit="mi"
+           totalEnergyBurned="200" totalEnergyBurnedUnit="kcal"
+           startDate="2026-05-30 07:00:00 -0500" endDate="2026-05-30 07:45:00 -0500">
+    <MetadataEntry key="HKExternalUUID" value="walk-uuid-001"/>
+  </Workout>
+
+  <!-- 2026-05-31: one step record, no distance, no calories -->
+  <Record type="HKQuantityTypeIdentifierStepCount" unit="count"
+          startDate="2026-05-31 09:00:00 -0500" endDate="2026-05-31 09:30:00 -0500" value="800"/>
+
+  <!-- Non-walking workout, should be ignored -->
+  <Workout workoutActivityType="HKWorkoutActivityTypeYoga"
+           duration="30" durationUnit="min"
+           startDate="2026-05-31 10:00:00 -0500" endDate="2026-05-31 10:30:00 -0500">
+    <MetadataEntry key="HKExternalUUID" value="yoga-uuid-001"/>
+  </Workout>
+
+  <!-- Other quantity type, should be ignored -->
+  <Record type="HKQuantityTypeIdentifierHeartRate" unit="count/min"
+          startDate="2026-05-31 09:00:00 -0500" endDate="2026-05-31 09:01:00 -0500" value="82"/>
+</HealthData>

@@ -79,16 +79,16 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 > Self-contained until **F1** (dedup). Use a fixture XML to test the parser.
 
-- [ ] **C1** Create `src/lib/health-import/__fixtures__/sample-export.xml` — small hand-crafted XML with 3 days of steps, 1 walking workout
-- [ ] **C2** Test `parseHealthExport(xmlStream)` returns `{ dailyMetrics: [...], workouts: [...] }`
-- [ ] **C3** Implement `src/lib/health-import/parse.ts` using `sax` streaming parser
-- [ ] **C4** Test aggregation: multiple `HKQuantityTypeIdentifierStepCount` records on same local date sum into one `daily_metric`
-- [ ] **C5** Implement aggregation logic
-- [ ] **C6** Test idempotent upsert: importing the same file twice doesn't duplicate rows (workouts dedup on `external_id`, metrics on `date`)
-- [ ] **C7** Implement `importHealthData(parsed)` in `src/lib/health-import/import.ts`
-- [ ] **C8** Test `POST /api/health/import` accepts multipart zip, unzips, streams parser, returns counts
-- [ ] **C9** Implement route — use Vercel Workflow for long-running parse (PRD §7); return job ID, poll for status
-- [ ] **C10** Add upload UI to Settings page with progress indicator
+- [x] **C1** Create `src/lib/health-import/__fixtures__/sample-export.xml` — small hand-crafted XML with 3 days of steps, 1 walking workout
+- [x] **C2** Test `parseHealthExport(xmlStream)` returns `{ dailyMetrics: [...], workouts: [...] }`
+- [x] **C3** Implement `src/lib/health-import/parse.ts` using `sax` streaming parser
+- [x] **C4** Test aggregation: multiple `HKQuantityTypeIdentifierStepCount` records on same local date sum into one `daily_metric`
+- [x] **C5** Implement aggregation logic
+- [x] **C6** Test idempotent upsert: importing the same file twice doesn't duplicate rows (workouts dedup on `external_id`, metrics on `date`)
+- [x] **C7** Implement `importHealthData(parsed)` in `src/lib/health-import/import.ts`
+- [x] **C8** Test `POST /api/health/import` accepts multipart zip, unzips, streams parser, returns counts
+- [x] **C9** Implement route — use Vercel Workflow for long-running parse (PRD §7); return job ID, poll for status
+- [x] **C10** Add upload UI to Settings page with progress indicator
 - [ ] **C11** End-to-end manual test with a real Apple Health export
 
 ### Group D: Apple Health streaming (Health Auto Export)
