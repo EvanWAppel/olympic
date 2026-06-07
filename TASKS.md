@@ -45,19 +45,19 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 > Self-contained — pure functions and DB schema. No UI dependencies.
 
-- [ ] **A1** Test `src/lib/__tests__/calc.test.ts` for `computeDistance(speedMph, minutes)`
-- [ ] **A2** Implement `src/lib/calc.ts` → `computeDistance`
-- [ ] **A3** Test `computeSteps(distanceMi, strideIn)` in same suite
-- [ ] **A4** Implement `computeSteps`
-- [ ] **A5** Test `computeCalories(speedMph, inclinePct, minutes, weightLb)` using ACSM MET formula — assert against 3 known values
-- [ ] **A6** Implement `computeCalories`
-- [ ] **A7** Extend `src/db/schema.ts`: add `workouts.source` (enum: `'treadmill' | 'outdoor'`), `notes`, `steps`, `calories`, `external_id` (nullable, unique), `updated_at`
-- [ ] **A8** Add `settings` table (singleton): `weight_lb`, `stride_in`, `daily_step_goal`, `weekly_miles_goal`, `timezone`, `health_ingest_secret`
-- [ ] **A9** Add `daily_metric` table: `date` (pk), `steps`, `distance_mi`, `active_calories`, `updated_at`
-- [ ] **A10** Generate + apply migration; verify against deployed DB via `drizzle-kit push --dry`
-- [ ] **A11** Test `getSettings()` / `upsertSettings()` repo
-- [ ] **A12** Implement `src/db/settings.repo.ts`
-- [ ] **A13** Seed default settings row in a migration or on first read
+- [x] **A1** Test `src/lib/__tests__/calc.test.ts` for `computeDistance(speedMph, minutes)`
+- [x] **A2** Implement `src/lib/calc.ts` → `computeDistance`
+- [x] **A3** Test `computeSteps(distanceMi, strideIn)` in same suite
+- [x] **A4** Implement `computeSteps`
+- [x] **A5** Test `computeCalories(speedMph, inclinePct, minutes, weightLb)` using ACSM MET formula — assert against 3 known values
+- [x] **A6** Implement `computeCalories`
+- [x] **A7** Extend `src/db/schema.ts`: add `workouts.source` (enum: `'treadmill' | 'outdoor'`), `notes`, `steps`, `calories`, `external_id` (nullable, unique), `updated_at`
+- [x] **A8** Add `settings` table (singleton): `weight_lb`, `stride_in`, `daily_step_goal`, `weekly_miles_goal`, `timezone`, `health_ingest_secret`
+- [x] **A9** Add `daily_metric` table: `date` (pk), `steps`, `distance_mi`, `active_calories`, `updated_at`
+- [x] **A10** Generate + apply migration; verify against deployed DB via `drizzle-kit push --dry`
+- [x] **A11** Test `getSettings()` / `upsertSettings()` repo
+- [x] **A12** Implement `src/db/settings.repo.ts`
+- [x] **A13** Seed default settings row in a migration or on first read
 
 ### Group B: Settings page & workout entry polish
 
