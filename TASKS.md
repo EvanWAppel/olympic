@@ -63,17 +63,17 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 > Depends on **A8, A11, A12** (settings repo) and **A1–A6** (calc functions).
 
-- [ ] **B1** Test `src/components/__tests__/settings-form.test.tsx` — loads current values, saves edits
-- [ ] **B2** Implement `src/app/settings/page.tsx` + `src/components/settings-form.tsx` (weight, stride, daily step goal, weekly miles goal, timezone)
-- [ ] **B3** Test `treadmill-entry-form` now sends computed `distance_mi`, `steps`, `calories` (using settings) along with raw fields
-- [ ] **B4** Update form: load settings on mount, compute on submit, send full row
-- [ ] **B5** Test API route validates and stores all new columns
-- [ ] **B6** Update `POST /api/workouts` to accept and persist full row; set `source='treadmill'`, `end_at=now`, `start_at=now-minutes`
-- [ ] **B7** Add Sonner toast on save success/failure
-- [ ] **B8** Test `PATCH /api/workouts/[id]` (edit) and `DELETE /api/workouts/[id]`
-- [ ] **B9** Implement edit + delete API routes
-- [ ] **B10** Test workout-list row component renders edit/delete affordances
-- [ ] **B11** Implement workout list with inline edit modal + delete confirm
+- [x] **B1** Test `src/components/__tests__/settings-form.test.tsx` — loads current values, saves edits
+- [x] **B2** Implement `src/app/settings/page.tsx` + `src/components/settings-form.tsx` (weight, stride, daily step goal, weekly miles goal, timezone)
+- [x] **B3** Test `treadmill-entry-form` now sends computed `distance_mi`, `steps`, `calories` (using settings) along with raw fields
+- [x] **B4** Update form: load settings on mount, compute on submit, send full row
+- [x] **B5** Test API route validates and stores all new columns
+- [x] **B6** Update `POST /api/workouts` to accept and persist full row; set `source='treadmill'`, `end_at=now`, `start_at=now-minutes`
+- [x] **B7** Add Sonner toast on save success/failure
+- [x] **B8** Test `PATCH /api/workouts/[id]` (edit) and `DELETE /api/workouts/[id]`
+- [x] **B9** Implement edit + delete API routes
+- [x] **B10** Test workout-list row component renders edit/delete affordances
+- [x] **B11** Implement workout list with inline edit modal + delete confirm
 
 ### Group C: Apple Health backfill (zip upload)
 

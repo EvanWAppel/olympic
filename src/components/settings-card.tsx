@@ -3,21 +3,22 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { TreadmillEntryForm, type TreadmillEntryValues } from "./treadmill-entry-form"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { SettingsForm, type SettingsValues } from "./settings-form"
 
 interface Props {
-  settings: { weightLb: number; strideIn: number }
+  initial: SettingsValues
 }
 
-export function EntryFormIsland({ settings }: Props) {
+export function SettingsCard({ initial }: Props) {
   const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
 
-  async function handleSubmit(values: TreadmillEntryValues) {
+  async function handleSubmit(values: SettingsValues) {
     setSubmitting(true)
     try {
-      const res = await fetch("/api/workouts", {
-        method: "POST",
+      const res = await fetch("/api/settings", {
+        method: "PATCH",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(values),
       })
@@ -25,7 +26,7 @@ export function EntryFormIsland({ settings }: Props) {
         const body = await res.json().catch(() => ({}))
         throw new Error(body.error ?? "Save failed")
       }
-      toast.success("Workout saved")
+      toast.success("Settings saved")
       router.refresh()
     } catch (err) {
       const message = err instanceof Error ? err.message : "Save failed"
@@ -36,10 +37,13 @@ export function EntryFormIsland({ settings }: Props) {
   }
 
   return (
-    <TreadmillEntryForm
-      settings={settings}
-      onSubmit={handleSubmit}
-      isSubmitting={submitting}
-    />
+    <Card>
+      <CardHeader>
+        <CardTitle>Profile & goals</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <SettingsForm initial={initial} onSubmit={handleSubmit} isSubmitting={submitting} />
+      </CardContent>
+    </Card>
   )
 }

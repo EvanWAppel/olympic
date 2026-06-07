@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { afterEach, beforeAll, describe, expect, it } from "vitest"
 import { config } from "dotenv"
 

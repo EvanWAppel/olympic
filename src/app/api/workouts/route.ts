@@ -6,6 +6,10 @@ const InputSchema = z.object({
   speedMph: z.number().positive().max(20),
   inclinePct: z.number().min(0).max(30),
   minutes: z.number().positive().max(600),
+  distanceMi: z.number().nonnegative().max(100),
+  steps: z.number().int().nonnegative().max(1_000_000),
+  calories: z.number().nonnegative().max(10_000),
+  notes: z.string().max(2000).optional(),
 })
 
 export async function POST(req: Request) {
@@ -18,18 +22,22 @@ export async function POST(req: Request) {
     )
   }
 
-  const { speedMph, inclinePct, minutes } = parsed.data
-  const distanceMi = speedMph * (minutes / 60)
+  const { speedMph, inclinePct, minutes, distanceMi, steps, calories, notes } =
+    parsed.data
   const endAt = new Date()
   const startAt = new Date(endAt.getTime() - minutes * 60_000)
 
   const row = await createWorkout({
+    source: "treadmill",
     startAt,
     endAt,
     minutes: minutes.toString(),
     speedMph: speedMph.toString(),
     inclinePct: inclinePct.toString(),
     distanceMi: distanceMi.toFixed(3),
+    steps,
+    calories: calories.toFixed(2),
+    notes: notes ?? null,
   })
 
   return NextResponse.json(row, { status: 201 })
