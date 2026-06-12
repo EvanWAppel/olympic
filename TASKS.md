@@ -89,7 +89,7 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 - [x] **C8** Test `POST /api/health/import` accepts multipart zip, unzips, streams parser, returns counts
 - [x] **C9** Implement route — use Vercel Workflow for long-running parse (PRD §7); return job ID, poll for status
 - [x] **C10** Add upload UI to Settings page with progress indicator
-- [ ] **C11** End-to-end manual test with a real Apple Health export
+- [x] **C11** End-to-end manual test with a real Apple Health export
 
 ### Group D: Apple Health streaming (Health Auto Export)
 
