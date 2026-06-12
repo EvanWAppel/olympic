@@ -112,40 +112,40 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 > Depends on **A8, A9, C7** (schema + import) so test data exists. Pure functions.
 
-- [ ] **E1** Test `src/lib/__tests__/dedup.test.ts`: `displayedDailyTotals(date, phoneMetric, treadmillWorkouts)` returns expected steps/distance/calories per PRD §6.2
-- [ ] **E2** Implement `src/lib/dedup.ts`
-- [ ] **E3** Test edge cases: no treadmill workout (passthrough); treadmill steps > phone steps (clamp to 0 then add); multiple treadmill workouts in one day
-- [ ] **E4** Refine impl to pass edge cases
-- [ ] **E5** Test `getDailyTotalsRange(start, end)` repo function that joins daily_metric + workouts and applies dedup
-- [ ] **E6** Implement aggregator in `src/db/totals.repo.ts`
+- [x] **E1** Test `src/lib/__tests__/dedup.test.ts`: `displayedDailyTotals(date, phoneMetric, treadmillWorkouts)` returns expected steps/distance/calories per PRD §6.2
+- [x] **E2** Implement `src/lib/dedup.ts`
+- [x] **E3** Test edge cases: no treadmill workout (passthrough); treadmill steps > phone steps (clamp to 0 then add); multiple treadmill workouts in one day
+- [x] **E4** Refine impl to pass edge cases
+- [x] **E5** Test `getDailyTotalsRange(start, end)` repo function that joins daily_metric + workouts and applies dedup
+- [x] **E6** Implement aggregator in `src/db/totals.repo.ts`
 
 ### Group F: Charts
 
 > Depends on **E5, E6**. Each chart is independent — split among agents if desired.
 
-- [ ] **F1** Install `recharts` and `react-activity-calendar`
-- [ ] **F2** Test `<DailyStepsBar>` component renders given totals array, respects 30/90/365 prop
-- [ ] **F3** Implement daily steps bar (stacked: treadmill vs outdoor portion, horizontal goal line)
-- [ ] **F4** Test `<WeeklyMilesLine>` computes weekly buckets + 4-week rolling average
-- [ ] **F5** Implement weekly miles line chart
-- [ ] **F6** Test `<YearHeatmap>` formats data for react-activity-calendar
-- [ ] **F7** Implement year heatmap
-- [ ] **F8** Test `<PaceTrend>` and `<InclineTrend>` (weekly averages of treadmill workouts)
-- [ ] **F9** Implement pace + incline trend line charts
+- [x] **F1** Install `recharts` and `react-activity-calendar`
+- [x] **F2** Test `<DailyStepsBar>` component renders given totals array, respects 30/90/365 prop
+- [x] **F3** Implement daily steps bar (stacked: treadmill vs outdoor portion, horizontal goal line)
+- [x] **F4** Test `<WeeklyMilesLine>` computes weekly buckets + 4-week rolling average
+- [x] **F5** Implement weekly miles line chart
+- [x] **F6** Test `<YearHeatmap>` formats data for react-activity-calendar
+- [x] **F7** Implement year heatmap
+- [x] **F8** Test `<PaceTrend>` and `<InclineTrend>` (weekly averages of treadmill workouts)
+- [x] **F9** Implement pace + incline trend line charts
 
 ### Group G: Cards, streaks, PRs
 
 > Depends on **E5, E6**. Streak/PR logic is pure functions — test-first.
 
-- [ ] **G1** Test `computeStreak(dailyTotals, goal)` returns current consecutive days hitting goal
-- [ ] **G2** Implement `src/lib/streak.ts`
-- [ ] **G3** Test `<TodayCard>`, `<StreakCard>`, `<WeekCard>`, `<YtdCard>` render correct values
-- [ ] **G4** Implement each card component
-- [ ] **G5** Test `computePRs(workouts, dailyTotals)` returns `{ longestWalkMinutes, fastestAvgSpeed, mostStepsDay, longestStreak }`
-- [ ] **G6** Implement `src/lib/prs.ts`
-- [ ] **G7** Test `<PrsPanel>` shows current PRs and a "new" badge when `pr.set_at` is within 7 days
-- [ ] **G8** Implement PRs panel
-- [ ] **G9** Wire all cards + charts into `src/app/page.tsx`; remove the Phase 0 placeholder chart
+- [x] **G1** Test `computeStreak(dailyTotals, goal)` returns current consecutive days hitting goal
+- [x] **G2** Implement `src/lib/streak.ts`
+- [x] **G3** Test `<TodayCard>`, `<StreakCard>`, `<WeekCard>`, `<YtdCard>` render correct values
+- [x] **G4** Implement each card component
+- [x] **G5** Test `computePRs(workouts, dailyTotals)` returns `{ longestWalkMinutes, fastestAvgSpeed, mostStepsDay, longestStreak }`
+- [x] **G6** Implement `src/lib/prs.ts`
+- [x] **G7** Test `<PrsPanel>` shows current PRs and a "new" badge when `pr.set_at` is within 7 days
+- [x] **G8** Implement PRs panel
+- [x] **G9** Wire all cards + charts into `src/app/page.tsx`; remove the Phase 0 placeholder chart
 
 ### Group H: Workout list & unified outdoor display
 
