@@ -41,14 +41,35 @@ function fmtNum(value: string | number | null, digits = 2): string {
   return Number(value).toFixed(digits)
 }
 
+const PAGE_SIZE = 50
+
+type SourceFilter = "all" | "treadmill" | "outdoor"
+
+const FILTERS: Array<{ value: SourceFilter; label: string }> = [
+  { value: "all", label: "All" },
+  { value: "treadmill", label: "Treadmill" },
+  { value: "outdoor", label: "Outdoor" },
+]
+
 export function WorkoutList({ workouts, settings }: Props) {
   const router = useRouter()
   const [editing, setEditing] = useState<Workout | null>(null)
   const [deleting, setDeleting] = useState<Workout | null>(null)
   const [busy, setBusy] = useState(false)
+  const [filter, setFilter] = useState<SourceFilter>("all")
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
   if (workouts.length === 0) {
     return <p className="text-sm text-muted-foreground">No workouts logged yet.</p>
+  }
+
+  const filtered =
+    filter === "all" ? workouts : workouts.filter((w) => w.source === filter)
+  const visible = filtered.slice(0, visibleCount)
+
+  function selectFilter(value: SourceFilter) {
+    setFilter(value)
+    setVisibleCount(PAGE_SIZE)
   }
 
   async function handleEditSubmit(values: TreadmillEntryValues) {
@@ -89,8 +110,22 @@ export function WorkoutList({ workouts, settings }: Props) {
 
   return (
     <>
+      <div className="flex gap-2">
+        {FILTERS.map(({ value, label }) => (
+          <Button
+            key={value}
+            size="sm"
+            variant={filter === value ? "default" : "outline"}
+            onClick={() => selectFilter(value)}
+            aria-pressed={filter === value}
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
+
       <ul className="divide-y divide-border text-sm">
-        {workouts.map((w) => (
+        {visible.map((w) => (
           <li
             key={w.id}
             className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between"
@@ -100,11 +135,9 @@ export function WorkoutList({ workouts, settings }: Props) {
                 <span className="font-medium">
                   {new Date(w.startAt).toLocaleString()}
                 </span>
-                {w.source === "outdoor" && (
-                  <span className="rounded-md bg-muted px-1.5 py-0.5 text-xs uppercase tracking-wide text-muted-foreground">
-                    outdoor
-                  </span>
-                )}
+                <span className="rounded-md bg-muted px-1.5 py-0.5 text-xs uppercase tracking-wide text-muted-foreground">
+                  {w.source}
+                </span>
               </div>
               <div className="text-muted-foreground">
                 {w.source === "treadmill" ? (
@@ -154,6 +187,18 @@ export function WorkoutList({ workouts, settings }: Props) {
           </li>
         ))}
       </ul>
+
+      {filtered.length > visibleCount && (
+        <div className="flex justify-center pt-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+          >
+            Load more ({filtered.length - visibleCount} remaining)
+          </Button>
+        </div>
+      )}
 
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent>

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { WorkoutList } from "../workout-list"
 
 const settings = { weightLb: 180, strideIn: 28 }
@@ -51,12 +52,73 @@ describe("<WorkoutList>", () => {
     expect(screen.getAllByRole("button", { name: /delete/i })).toHaveLength(2)
   })
 
-  it("tags outdoor workouts with a source badge", () => {
+  it("tags every row with its source badge", () => {
     const workouts = [
       makeWorkout({ id: "a" }),
       makeWorkout({ id: "b", source: "outdoor", speedMph: null, inclinePct: null }),
     ]
     render(<WorkoutList workouts={workouts} settings={settings} />)
-    expect(screen.getByText(/outdoor/i)).toBeInTheDocument()
+    const list = screen.getByRole("list")
+    expect(list).toHaveTextContent(/treadmill/i)
+    expect(list).toHaveTextContent(/outdoor/i)
+  })
+
+  it("filters rows by source via chips", async () => {
+    const user = userEvent.setup()
+    const workouts = [
+      makeWorkout({ id: "a" }),
+      makeWorkout({ id: "b" }),
+      makeWorkout({ id: "c", source: "outdoor", speedMph: null, inclinePct: null }),
+    ]
+    render(<WorkoutList workouts={workouts} settings={settings} />)
+    expect(screen.getAllByRole("listitem")).toHaveLength(3)
+
+    await user.click(screen.getByRole("button", { name: /^treadmill$/i }))
+    expect(screen.getAllByRole("listitem")).toHaveLength(2)
+
+    await user.click(screen.getByRole("button", { name: /^outdoor$/i }))
+    expect(screen.getAllByRole("listitem")).toHaveLength(1)
+
+    await user.click(screen.getByRole("button", { name: /^all$/i }))
+    expect(screen.getAllByRole("listitem")).toHaveLength(3)
+  })
+
+  it("paginates long lists with a load-more button", async () => {
+    const user = userEvent.setup()
+    const workouts = Array.from({ length: 120 }, (_, i) =>
+      makeWorkout({ id: `w-${i}` }),
+    )
+    render(<WorkoutList workouts={workouts} settings={settings} />)
+    expect(screen.getAllByRole("listitem")).toHaveLength(50)
+
+    await user.click(screen.getByRole("button", { name: /load more/i }))
+    expect(screen.getAllByRole("listitem")).toHaveLength(100)
+
+    await user.click(screen.getByRole("button", { name: /load more/i }))
+    expect(screen.getAllByRole("listitem")).toHaveLength(120)
+    expect(
+      screen.queryByRole("button", { name: /load more/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it("resets pagination when the source filter changes", async () => {
+    const user = userEvent.setup()
+    const workouts = [
+      ...Array.from({ length: 60 }, (_, i) => makeWorkout({ id: `t-${i}` })),
+      ...Array.from({ length: 10 }, (_, i) =>
+        makeWorkout({
+          id: `o-${i}`,
+          source: "outdoor",
+          speedMph: null,
+          inclinePct: null,
+        }),
+      ),
+    ]
+    render(<WorkoutList workouts={workouts} settings={settings} />)
+    await user.click(screen.getByRole("button", { name: /load more/i }))
+    expect(screen.getAllByRole("listitem")).toHaveLength(70)
+
+    await user.click(screen.getByRole("button", { name: /^outdoor$/i }))
+    expect(screen.getAllByRole("listitem")).toHaveLength(10)
   })
 })

@@ -151,10 +151,10 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 > Depends on **B8–B11**, **C7**. Touches list UI.
 
-- [ ] **H1** Test workout list shows both `treadmill` and `outdoor` rows with source badge
-- [ ] **H2** Implement unified list with source filter chips
-- [ ] **H3** Test pagination / infinite scroll for >100 workouts
-- [ ] **H4** Implement pagination
+- [x] **H1** Test workout list shows both `treadmill` and `outdoor` rows with source badge
+- [x] **H2** Implement unified list with source filter chips
+- [x] **H3** Test pagination / infinite scroll for >100 workouts
+- [x] **H4** Implement pagination
 
 ---
 
