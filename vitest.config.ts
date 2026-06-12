@@ -14,6 +14,10 @@ export default defineConfig({
     pool: "forks",
     fileParallelism: false,
     ...({ forks: { singleFork: true } } as Record<string, unknown>),
+    // DB tests run against a remote Neon branch; cold compute wake-ups and
+    // network jitter can exceed the 5s/10s defaults.
+    testTimeout: 20_000,
+    hookTimeout: 30_000,
   },
   resolve: {
     alias: {

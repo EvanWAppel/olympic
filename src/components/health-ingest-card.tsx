@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState, useSyncExternalStore } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -19,11 +19,13 @@ export function HealthIngestCard({ initialSecret }: Props) {
   const [secret, setSecret] = useState(initialSecret)
   const [showSecret, setShowSecret] = useState(false)
   const [busy, setBusy] = useState(false)
-  const [origin, setOrigin] = useState("")
-
-  useEffect(() => {
-    setOrigin(window.location.origin)
-  }, [])
+  // Hydration-safe read of a client-only value: "" on the server, the real
+  // origin after hydration.
+  const origin = useSyncExternalStore(
+    () => () => {},
+    () => window.location.origin,
+    () => "",
+  )
 
   const ingestUrl = origin ? `${origin}/api/health/ingest` : "/api/health/ingest"
 
