@@ -164,15 +164,15 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 ### Group I: PWA shell & offline save queue
 
-- [ ] **I1** Add `public/manifest.json` with name, icons (192/512), `display: standalone`, theme color
-- [ ] **I2** Generate icon set (use a simple footprint or treadmill emoji on solid bg)
-- [ ] **I3** Add `<link rel="manifest">` and apple-touch-icon meta to `app/layout.tsx`
-- [ ] **I4** Manually test add-to-home-screen on iOS Safari
-- [ ] **I5** Test offline-queue helper `src/lib/offline-queue.ts`: queues a workout when offline, replays on `online` event
-- [ ] **I6** Implement offline-queue using IndexedDB (`idb-keyval`)
-- [ ] **I7** Wire entry form to use queue when `navigator.onLine === false`
-- [ ] **I8** Add service worker (Workbox via `next-pwa` or custom minimal SW) for app-shell caching
-- [ ] **I9** Test offline scenario manually: airplane mode → log workout → reconnect → verify save
+- [x] **I1** Add `public/manifest.json` with name, icons (192/512), `display: standalone`, theme color
+- [x] **I2** Generate icon set (use a simple footprint or treadmill emoji on solid bg)
+- [x] **I3** Add `<link rel="manifest">` and apple-touch-icon meta to `app/layout.tsx`
+- [ ] **I4** Manually test add-to-home-screen on iOS Safari _(needs physical device — deferred to post-deploy)_
+- [x] **I5** Test offline-queue helper `src/lib/offline-queue.ts`: queues a workout when offline, replays on `online` event
+- [x] **I6** Implement offline-queue using IndexedDB (`idb-keyval`)
+- [x] **I7** Wire entry form to use queue when `navigator.onLine === false`
+- [x] **I8** Add service worker (Workbox via `next-pwa` or custom minimal SW) for app-shell caching
+- [ ] **I9** Test offline scenario manually: airplane mode → log workout → reconnect → verify save _(needs physical device — deferred to post-deploy)_
 
 ---
 
