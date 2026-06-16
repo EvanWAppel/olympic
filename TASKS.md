@@ -182,11 +182,11 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 ### Group J: Export, danger zone, deploy
 
-- [ ] **J1** Test `GET /api/export.csv` returns all workouts + daily_metrics as one zipped CSV bundle
-- [ ] **J2** Implement export route
-- [ ] **J3** Add "Export CSV" button to Settings
-- [ ] **J4** Test `DELETE /api/all-data` (with confirmation header) wipes user data
-- [ ] **J5** Implement danger-zone delete with double-confirm UI
+- [x] **J1** Test `GET /api/export.csv` returns all workouts + daily_metrics as one zipped CSV bundle _(route at `/api/export`, returns a `.zip` of two CSVs)_
+- [x] **J2** Implement export route
+- [x] **J3** Add "Export CSV" button to Settings
+- [x] **J4** Test `DELETE /api/all-data` (with confirmation header) wipes user data _(DB mocked — route is an unscoped delete, must not run against the shared dev DB)_
+- [x] **J5** Implement danger-zone delete with double-confirm UI
 - [ ] **J6** Audit timezone handling end-to-end (entry timestamps, daily bucketing, heatmap day boundaries — all use `settings.timezone`)
 - [ ] **J7** Add error boundaries on each dashboard section
 - [ ] **J8** Run Lighthouse on prod; address any a11y issues

@@ -3,6 +3,8 @@ import { getSettings } from "@/db/settings.repo"
 import { SettingsCard } from "@/components/settings-card"
 import { HealthImportCard } from "@/components/health-import-card"
 import { HealthIngestCard } from "@/components/health-ingest-card"
+import { ExportCard } from "@/components/export-card"
+import { DangerZoneCard } from "@/components/danger-zone-card"
 
 export const dynamic = "force-dynamic"
 
@@ -34,6 +36,10 @@ export default async function SettingsPage() {
       <HealthImportCard />
 
       <HealthIngestCard initialSecret={s.healthIngestSecret} />
+
+      <ExportCard />
+
+      <DangerZoneCard />
     </main>
   )
 }
