@@ -36,6 +36,11 @@ yarn-error.log*
 # vercel
 .vercel
 
+# apple health exports (large personal data, do not commit)
+export.zip
+*-export.zip
+apple_health_export/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
