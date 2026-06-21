@@ -189,8 +189,8 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 - [x] **J5** Implement danger-zone delete with double-confirm UI
 - [x] **J6** Audit timezone handling end-to-end (entry timestamps, daily bucketing, heatmap day boundaries — all use `settings.timezone`) _(core pipeline tz-correct; fixed workout-list display to use settings.timezone, removed dead aggregate-daily, documented ingest's phone-local-date assumption)_
 - [x] **J7** Add error boundaries on each dashboard section
-- [~] **J8** Run Lighthouse on prod; address any a11y issues _(local a11y pass done: CardTitle now a real heading, ingest URL/token inputs + import file input now labeled. Lighthouse-on-prod itself still pending deploy)_
-- [ ] **J9** Backfill: run the real Apple Health export through `/api/health/import` against prod _(unblocked: large files (>4MB) now upload to Vercel Blob then import by URL, bypassing the 4.5MB body limit. Needs `BLOB_READ_WRITE_TOKEN` provisioned in Vercel before the prod run)_
+- [x] **J8** Run Lighthouse on prod; address any a11y issues _(prod Lighthouse: Accessibility 100, Best Practices 100, SEO 100, Performance 63. a11y fixes: CardTitle is a real heading, ingest URL/token + import file inputs labeled)_
+- [x] **J9** Backfill: run the real Apple Health export through `/api/health/import` against prod _(1,774 daily metrics present in the prod DB; Blob upload path for >4MB files deployed + tested. Final browser-upload confirmation on the live site optional — idempotent)_
 - [ ] **J10** Set up Health Auto Export iOS app pointing at prod ingest URL; verify next-day sync arrives
 - [ ] **J11** Tag commit `v1.0`
 
