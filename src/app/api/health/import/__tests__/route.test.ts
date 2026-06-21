@@ -14,7 +14,7 @@ let dailyMetric: typeof import("@/db/schema").dailyMetric
 let inArray: typeof import("drizzle-orm").inArray
 
 const FIXTURE = path.join(__dirname, "../../../../../lib/health-import/__fixtures__/sample-export.xml")
-const FIXTURE_DATES = ["2026-05-29", "2026-05-30", "2026-05-31"]
+const FIXTURE_DATES = ["2099-05-29", "2099-05-30", "2099-05-31"]
 const FIXTURE_EXTERNAL_IDS = ["walk-uuid-001"]
 
 beforeAll(async () => {

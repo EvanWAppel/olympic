@@ -11,9 +11,9 @@ describe("parseHealthExport", () => {
     const xml = await readFile(FIXTURE, "utf-8")
     const parsed = await parseHealthExport(xml, "America/Chicago")
 
-    const may29 = parsed.dailyMetrics.find((d) => d.date === "2026-05-29")
-    const may30 = parsed.dailyMetrics.find((d) => d.date === "2026-05-30")
-    const may31 = parsed.dailyMetrics.find((d) => d.date === "2026-05-31")
+    const may29 = parsed.dailyMetrics.find((d) => d.date === "2099-05-29")
+    const may30 = parsed.dailyMetrics.find((d) => d.date === "2099-05-30")
+    const may31 = parsed.dailyMetrics.find((d) => d.date === "2099-05-31")
 
     expect(may29?.steps).toBe(1200)
     expect(may30?.steps).toBe(2200)
@@ -24,8 +24,8 @@ describe("parseHealthExport", () => {
     const xml = await readFile(FIXTURE, "utf-8")
     const parsed = await parseHealthExport(xml, "America/Chicago")
 
-    const may29 = parsed.dailyMetrics.find((d) => d.date === "2026-05-29")
-    const may30 = parsed.dailyMetrics.find((d) => d.date === "2026-05-30")
+    const may29 = parsed.dailyMetrics.find((d) => d.date === "2099-05-29")
+    const may30 = parsed.dailyMetrics.find((d) => d.date === "2099-05-30")
 
     expect(may29?.distanceMi).toBeCloseTo(0.6, 3)
     // 1.5 km → 0.9321 mi (1 km = 0.621371 mi)
@@ -36,8 +36,8 @@ describe("parseHealthExport", () => {
     const xml = await readFile(FIXTURE, "utf-8")
     const parsed = await parseHealthExport(xml, "America/Chicago")
 
-    const may29 = parsed.dailyMetrics.find((d) => d.date === "2026-05-29")
-    const may30 = parsed.dailyMetrics.find((d) => d.date === "2026-05-30")
+    const may29 = parsed.dailyMetrics.find((d) => d.date === "2099-05-29")
+    const may30 = parsed.dailyMetrics.find((d) => d.date === "2099-05-30")
 
     expect(may29?.activeCalories).toBeCloseTo(45, 1)
     expect(may30?.activeCalories).toBeCloseTo(200, 1) // 120 + 80

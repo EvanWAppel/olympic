@@ -33,8 +33,8 @@ afterEach(async () => {
 
 describe("workouts repo", () => {
   it("createWorkout inserts and returns the row", async () => {
-    const start = new Date("2026-05-31T18:00:00Z")
-    const end = new Date("2026-05-31T18:45:00Z")
+    const start = new Date("2099-05-31T18:00:00Z")
+    const end = new Date("2099-05-31T18:45:00Z")
     const row = await createWorkout({
       startAt: start,
       endAt: end,
@@ -57,16 +57,16 @@ describe("workouts repo", () => {
 
   it("listWorkouts returns workouts ordered by startAt desc", async () => {
     const earlier = await createWorkout({
-      startAt: new Date("2026-05-30T18:00:00Z"),
-      endAt: new Date("2026-05-30T18:30:00Z"),
+      startAt: new Date("2099-05-30T18:00:00Z"),
+      endAt: new Date("2099-05-30T18:30:00Z"),
       minutes: "30",
       speedMph: "3.0",
       inclinePct: "2.0",
       distanceMi: "1.5",
     })
     const later = await createWorkout({
-      startAt: new Date("2026-05-31T18:00:00Z"),
-      endAt: new Date("2026-05-31T18:45:00Z"),
+      startAt: new Date("2099-05-31T18:00:00Z"),
+      endAt: new Date("2099-05-31T18:45:00Z"),
       minutes: "45",
       speedMph: "3.5",
       inclinePct: "5.0",

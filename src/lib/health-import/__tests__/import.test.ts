@@ -16,7 +16,7 @@ let inArray: typeof import("drizzle-orm").inArray
 
 const FIXTURE = path.join(__dirname, "../__fixtures__/sample-export.xml")
 const TZ = "America/Chicago"
-const FIXTURE_DATES = ["2026-05-29", "2026-05-30", "2026-05-31"]
+const FIXTURE_DATES = ["2099-05-29", "2099-05-30", "2099-05-31"]
 const FIXTURE_EXTERNAL_IDS = ["walk-uuid-001"]
 
 beforeAll(async () => {
@@ -80,7 +80,7 @@ describe("importHealthData", () => {
   it("overwrites daily metrics with newer parsed values", async () => {
     await importHealthData({
       dailyMetrics: [
-        { date: "2026-05-30", steps: 100, distanceMi: 0.1, activeCalories: 5 },
+        { date: "2099-05-30", steps: 100, distanceMi: 0.1, activeCalories: 5 },
       ],
       workouts: [],
     })
@@ -90,7 +90,7 @@ describe("importHealthData", () => {
     const [row] = await db
       .select()
       .from(dailyMetric)
-      .where(eq(dailyMetric.date, "2026-05-30"))
+      .where(eq(dailyMetric.date, "2099-05-30"))
     expect(row.steps).toBe(2200)
   })
 })

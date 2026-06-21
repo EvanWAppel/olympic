@@ -12,7 +12,7 @@ let inArray: typeof import("drizzle-orm").inArray
 let getSettings: typeof import("@/db/settings.repo").getSettings
 let secret: string
 
-const FIXTURE_DATES = ["2026-05-29", "2026-05-30", "2026-05-31"]
+const FIXTURE_DATES = ["2099-05-29", "2099-05-30", "2099-05-31"]
 const FIXTURE_EXTERNAL_IDS = ["hae-walk-1", "hae-walk-2"]
 
 beforeAll(async () => {
@@ -32,16 +32,16 @@ afterEach(async () => {
 
 const validBody = {
   metrics: [
-    { name: "step_count", units: "count", data: [{ date: "2026-05-29", qty: 8500 }] },
-    { name: "walking_running_distance", units: "mi", data: [{ date: "2026-05-29", qty: 4.2 }] },
-    { name: "active_energy", units: "kcal", data: [{ date: "2026-05-29", qty: 290 }] },
+    { name: "step_count", units: "count", data: [{ date: "2099-05-29", qty: 8500 }] },
+    { name: "walking_running_distance", units: "mi", data: [{ date: "2099-05-29", qty: 4.2 }] },
+    { name: "active_energy", units: "kcal", data: [{ date: "2099-05-29", qty: 290 }] },
   ],
   workouts: [
     {
       id: "hae-walk-1",
       name: "Walking",
-      start: "2026-05-29T07:00:00Z",
-      end: "2026-05-29T07:45:00Z",
+      start: "2099-05-29T07:00:00Z",
+      end: "2099-05-29T07:45:00Z",
       distance: { qty: 2.5, units: "mi" },
       activeEnergyBurned: { qty: 180, units: "kcal" },
       steps: { qty: 5280, units: "count" },
@@ -100,7 +100,7 @@ describe("POST /api/health/ingest", () => {
     const updated = {
       ...validBody,
       metrics: [
-        { name: "step_count", units: "count", data: [{ date: "2026-05-29", qty: 9999 }] },
+        { name: "step_count", units: "count", data: [{ date: "2099-05-29", qty: 9999 }] },
       ],
       workouts: [],
     }
@@ -108,7 +108,7 @@ describe("POST /api/health/ingest", () => {
     const [row] = await db
       .select()
       .from(dailyMetric)
-      .where(inArray(dailyMetric.date, ["2026-05-29"]))
+      .where(inArray(dailyMetric.date, ["2099-05-29"]))
     expect(row.steps).toBe(9999)
   })
 })

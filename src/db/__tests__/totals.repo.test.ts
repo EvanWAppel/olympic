@@ -13,7 +13,7 @@ let createWorkout: typeof import("../workouts.repo").createWorkout
 let getSettings: typeof import("../settings.repo").getSettings
 
 const createdWorkoutIds: string[] = []
-const seededDates = ["2026-06-08", "2026-06-09", "2026-06-10"]
+const seededDates = ["2099-06-08", "2099-06-09", "2099-06-10"]
 let timezone: string
 
 beforeAll(async () => {
@@ -66,29 +66,29 @@ async function seedPhoneDay(date: string, steps: number, distanceMi: number, kca
 
 describe("getDailyTotalsRange", () => {
   it("returns one entry per date in the range", async () => {
-    await seedPhoneDay("2026-06-08", 8000, 4, 300)
-    await seedPhoneDay("2026-06-09", 0, 0, 0)
-    await seedPhoneDay("2026-06-10", 5000, 2.5, 200)
+    await seedPhoneDay("2099-06-08", 8000, 4, 300)
+    await seedPhoneDay("2099-06-09", 0, 0, 0)
+    await seedPhoneDay("2099-06-10", 5000, 2.5, 200)
 
     const days = await getDailyTotalsRange({
-      startDate: "2026-06-08",
-      endDate: "2026-06-10",
+      startDate: "2099-06-08",
+      endDate: "2099-06-10",
       timezone,
     })
     expect(days.map((d) => d.date)).toEqual([
-      "2026-06-08",
-      "2026-06-09",
-      "2026-06-10",
+      "2099-06-08",
+      "2099-06-09",
+      "2099-06-10",
     ])
   })
 
   it("subtracts treadmill workouts from same-day phone totals", async () => {
-    await seedPhoneDay("2026-06-08", 8000, 4, 300)
-    await seedTreadmill("2026-06-08", 3000, 1.5, 120)
+    await seedPhoneDay("2099-06-08", 8000, 4, 300)
+    await seedTreadmill("2099-06-08", 3000, 1.5, 120)
 
     const days = await getDailyTotalsRange({
-      startDate: "2026-06-08",
-      endDate: "2026-06-08",
+      startDate: "2099-06-08",
+      endDate: "2099-06-08",
       timezone,
     })
     const day = days[0]
@@ -99,8 +99,8 @@ describe("getDailyTotalsRange", () => {
 
   it("returns zero-valued days when no data exists", async () => {
     const days = await getDailyTotalsRange({
-      startDate: "2026-06-08",
-      endDate: "2026-06-09",
+      startDate: "2099-06-08",
+      endDate: "2099-06-09",
       timezone,
     })
     expect(days).toHaveLength(2)

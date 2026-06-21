@@ -33,8 +33,8 @@ afterEach(async () => {
 async function seed() {
   const row = await createWorkout({
     source: "treadmill",
-    startAt: new Date("2026-05-31T18:00:00Z"),
-    endAt: new Date("2026-05-31T18:45:00Z"),
+    startAt: new Date("2099-05-31T18:00:00Z"),
+    endAt: new Date("2099-05-31T18:45:00Z"),
     minutes: "45",
     speedMph: "3.5",
     inclinePct: "5",
