@@ -66,6 +66,7 @@ export function HealthImportCard() {
             type="file"
             accept=".zip,application/zip"
             disabled={busy}
+            aria-label="Apple Health export zip file"
           />
           <Button type="submit" disabled={busy} className="justify-self-start">
             {busy ? "Importing…" : "Upload export.zip"}

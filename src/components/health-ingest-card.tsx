@@ -77,9 +77,16 @@ export function HealthIngestCard({ initialSecret }: Props) {
       </CardHeader>
       <CardContent className="grid gap-4">
         <div className="grid gap-2">
-          <label className="text-sm font-medium">Endpoint URL</label>
+          <label htmlFor="ingest-endpoint-url" className="text-sm font-medium">
+            Endpoint URL
+          </label>
           <div className="flex gap-2">
-            <Input readOnly value={ingestUrl} className="font-mono text-xs" />
+            <Input
+              id="ingest-endpoint-url"
+              readOnly
+              value={ingestUrl}
+              className="font-mono text-xs"
+            />
             <Button
               type="button"
               variant="outline"
@@ -92,9 +99,12 @@ export function HealthIngestCard({ initialSecret }: Props) {
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm font-medium">Bearer token</label>
+          <label htmlFor="ingest-bearer-token" className="text-sm font-medium">
+            Bearer token
+          </label>
           <div className="flex gap-2">
             <Input
+              id="ingest-bearer-token"
               readOnly
               value={showSecret ? secret : maskSecret(secret)}
               className="font-mono text-xs"
