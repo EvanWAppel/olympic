@@ -3,6 +3,7 @@
 import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { upload } from "@vercel/blob/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,6 +11,28 @@ import { Input } from "@/components/ui/input"
 interface ImportResult {
   dailyMetricsUpserted: number
   workoutsUpserted: number
+}
+
+// Vercel caps request bodies at ~4.5 MB. Larger files go to Blob first, then we
+// hand the import route just the URL.
+const DIRECT_UPLOAD_LIMIT = 4 * 1024 * 1024
+
+async function importViaMultipart(file: File): Promise<Response> {
+  const form = new FormData()
+  form.append("file", file)
+  return fetch("/api/health/import", { method: "POST", body: form })
+}
+
+async function importViaBlob(file: File): Promise<Response> {
+  const blob = await upload(file.name, file, {
+    access: "public",
+    handleUploadUrl: "/api/health/blob-upload",
+  })
+  return fetch("/api/health/import", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ blobUrl: blob.url }),
+  })
 }
 
 export function HealthImportCard() {
@@ -28,9 +51,10 @@ export function HealthImportCard() {
     setBusy(true)
     setLastResult(null)
     try {
-      const form = new FormData()
-      form.append("file", file)
-      const res = await fetch("/api/health/import", { method: "POST", body: form })
+      const res =
+        file.size > DIRECT_UPLOAD_LIMIT
+          ? await importViaBlob(file)
+          : await importViaMultipart(file)
       const body = (await res.json().catch(() => ({}))) as
         | (ImportResult & { error?: undefined })
         | { error: string; message?: string }
