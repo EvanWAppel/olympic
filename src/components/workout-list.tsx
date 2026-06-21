@@ -34,11 +34,34 @@ type Workout = {
 interface Props {
   workouts: Workout[]
   settings: { weightLb: number; strideIn: number }
+  /** IANA timezone for displaying workout timestamps (from settings). */
+  timezone: string
 }
 
 function fmtNum(value: string | number | null, digits = 2): string {
   if (value === null || value === undefined) return "—"
   return Number(value).toFixed(digits)
+}
+
+// Constructing an Intl formatter is expensive, so cache one per timezone
+// rather than building a new one on every render of every row.
+const dateTimeFormatters = new Map<string, Intl.DateTimeFormat>()
+function dateTimeFormatter(timezone: string): Intl.DateTimeFormat {
+  let fmt = dateTimeFormatters.get(timezone)
+  if (!fmt) {
+    fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      dateStyle: "medium",
+      timeStyle: "short",
+    })
+    dateTimeFormatters.set(timezone, fmt)
+  }
+  return fmt
+}
+
+/** Format an instant in the user's configured timezone, not the browser's. */
+function fmtDateTime(at: string | Date, timezone: string): string {
+  return dateTimeFormatter(timezone).format(new Date(at))
 }
 
 const PAGE_SIZE = 50
@@ -51,7 +74,7 @@ const FILTERS: Array<{ value: SourceFilter; label: string }> = [
   { value: "outdoor", label: "Outdoor" },
 ]
 
-export function WorkoutList({ workouts, settings }: Props) {
+export function WorkoutList({ workouts, settings, timezone }: Props) {
   const router = useRouter()
   const [editing, setEditing] = useState<Workout | null>(null)
   const [deleting, setDeleting] = useState<Workout | null>(null)
@@ -133,7 +156,7 @@ export function WorkoutList({ workouts, settings }: Props) {
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
                 <span className="font-medium">
-                  {new Date(w.startAt).toLocaleString()}
+                  {fmtDateTime(w.startAt, timezone)}
                 </span>
                 <span className="rounded-md bg-muted px-1.5 py-0.5 text-xs uppercase tracking-wide text-muted-foreground">
                   {w.source}
@@ -159,7 +182,7 @@ export function WorkoutList({ workouts, settings }: Props) {
                   size="sm"
                   variant="outline"
                   onClick={() => setEditing(w)}
-                  aria-label={`Edit workout from ${new Date(w.startAt).toLocaleString()}`}
+                  aria-label={`Edit workout from ${fmtDateTime(w.startAt, timezone)}`}
                 >
                   Edit
                 </Button>
@@ -179,7 +202,7 @@ export function WorkoutList({ workouts, settings }: Props) {
                 size="sm"
                 variant="outline"
                 onClick={() => setDeleting(w)}
-                aria-label={`Delete workout from ${new Date(w.startAt).toLocaleString()}`}
+                aria-label={`Delete workout from ${fmtDateTime(w.startAt, timezone)}`}
               >
                 Delete
               </Button>
@@ -231,7 +254,7 @@ export function WorkoutList({ workouts, settings }: Props) {
             <DialogTitle>Delete this workout?</DialogTitle>
             <DialogDescription>
               {deleting &&
-                `Workout on ${new Date(deleting.startAt).toLocaleString()} will be permanently removed.`}
+                `Workout on ${fmtDateTime(deleting.startAt, timezone)} will be permanently removed.`}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

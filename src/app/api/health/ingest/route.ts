@@ -72,6 +72,11 @@ interface DailyAgg {
   activeCalories: number
 }
 
+// NOTE: Health Auto Export already emits each data point's `date` as a local
+// calendar day (YYYY-MM-DD) on the phone. We trust that local date as-is rather
+// than re-deriving it from an instant, so daily buckets match what the user saw
+// on their device. If the phone's timezone differs from `settings.timezone`,
+// the phone's day wins for these phone-sourced metrics — which is the intent.
 function aggregateMetrics(metrics: z.infer<typeof Metric>[]): Map<string, DailyAgg> {
   const out = new Map<string, DailyAgg>()
   function bucket(date: string): DailyAgg {

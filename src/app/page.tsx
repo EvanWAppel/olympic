@@ -18,6 +18,7 @@ import { YearHeatmap } from "@/components/charts/year-heatmap"
 import { PaceInclineTrend } from "@/components/charts/pace-incline-trend"
 import { EntryFormIsland } from "@/components/entry-form-island"
 import { WorkoutList } from "@/components/workout-list"
+import { SectionErrorBoundary } from "@/components/section-error-boundary"
 
 export const dynamic = "force-dynamic"
 
@@ -106,84 +107,102 @@ export default async function Home() {
         </Link>
       </header>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <TodayCard
-          steps={todayTotals?.totalSteps ?? 0}
-          distanceMi={todayTotals?.totalDistanceMi ?? 0}
-          calories={todayTotals?.totalCalories ?? 0}
-          goal={stepGoal}
-        />
-        <StreakCard days={streak} />
-        <WeekCard miles={thisWeekMiles} goalMiles={milesGoal} />
-        <YtdCard miles={ytdMiles} workoutCount={ytdWorkoutCount} />
-      </div>
+      <SectionErrorBoundary name="Summary cards">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <TodayCard
+            steps={todayTotals?.totalSteps ?? 0}
+            distanceMi={todayTotals?.totalDistanceMi ?? 0}
+            calories={todayTotals?.totalCalories ?? 0}
+            goal={stepGoal}
+          />
+          <StreakCard days={streak} />
+          <WeekCard miles={thisWeekMiles} goalMiles={milesGoal} />
+          <YtdCard miles={ytdMiles} workoutCount={ytdWorkoutCount} />
+        </div>
+      </SectionErrorBoundary>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Log a workout</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <EntryFormIsland settings={settings} />
-        </CardContent>
-      </Card>
+      <SectionErrorBoundary name="Log a workout">
+        <Card>
+          <CardHeader>
+            <CardTitle>Log a workout</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <EntryFormIsland settings={settings} />
+          </CardContent>
+        </Card>
+      </SectionErrorBoundary>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Daily steps · last 30 days</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DailyStepsBar data={last30} goal={stepGoal} />
-        </CardContent>
-      </Card>
+      <SectionErrorBoundary name="Daily steps">
+        <Card>
+          <CardHeader>
+            <CardTitle>Daily steps · last 30 days</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DailyStepsBar data={last30} goal={stepGoal} />
+          </CardContent>
+        </Card>
+      </SectionErrorBoundary>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly miles</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <WeeklyMilesLine weeks={weeks} />
-          </CardContent>
-        </Card>
-        <PrsPanel prs={prs} today={today} />
+        <SectionErrorBoundary name="Weekly miles">
+          <Card>
+            <CardHeader>
+              <CardTitle>Weekly miles</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <WeeklyMilesLine weeks={weeks} />
+            </CardContent>
+          </Card>
+        </SectionErrorBoundary>
+        <SectionErrorBoundary name="Personal records">
+          <PrsPanel prs={prs} today={today} />
+        </SectionErrorBoundary>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Past year</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <YearHeatmap data={heatmap} maxScale={stepGoal} />
-        </CardContent>
-      </Card>
+      <SectionErrorBoundary name="Past year">
+        <Card>
+          <CardHeader>
+            <CardTitle>Past year</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <YearHeatmap data={heatmap} maxScale={stepGoal} />
+          </CardContent>
+        </Card>
+      </SectionErrorBoundary>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Pace trend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PaceInclineTrend data={paceIncline} metric="speed" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Incline trend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PaceInclineTrend data={paceIncline} metric="incline" />
-          </CardContent>
-        </Card>
+        <SectionErrorBoundary name="Pace trend">
+          <Card>
+            <CardHeader>
+              <CardTitle>Pace trend</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PaceInclineTrend data={paceIncline} metric="speed" />
+            </CardContent>
+          </Card>
+        </SectionErrorBoundary>
+        <SectionErrorBoundary name="Incline trend">
+          <Card>
+            <CardHeader>
+              <CardTitle>Incline trend</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PaceInclineTrend data={paceIncline} metric="incline" />
+            </CardContent>
+          </Card>
+        </SectionErrorBoundary>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent workouts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <WorkoutList workouts={serialized} settings={settings} />
-        </CardContent>
-      </Card>
+      <SectionErrorBoundary name="Recent workouts">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent workouts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <WorkoutList workouts={serialized} settings={settings} timezone={timezone} />
+          </CardContent>
+        </Card>
+      </SectionErrorBoundary>
     </main>
   )
 }

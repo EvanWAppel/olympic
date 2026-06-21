@@ -38,7 +38,7 @@ function makeWorkout(overrides: Partial<{
 
 describe("<WorkoutList>", () => {
   it("renders an empty state when no workouts", () => {
-    render(<WorkoutList workouts={[]} settings={settings} />)
+    render(<WorkoutList workouts={[]} settings={settings} timezone="America/New_York" />)
     expect(screen.getByText(/no workouts/i)).toBeInTheDocument()
   })
 
@@ -47,9 +47,23 @@ describe("<WorkoutList>", () => {
       makeWorkout({ id: "a" }),
       makeWorkout({ id: "b", source: "outdoor", speedMph: null, inclinePct: null }),
     ]
-    render(<WorkoutList workouts={workouts} settings={settings} />)
+    render(<WorkoutList workouts={workouts} settings={settings} timezone="America/New_York" />)
     expect(screen.getAllByRole("button", { name: /edit/i })).toHaveLength(2)
     expect(screen.getAllByRole("button", { name: /delete/i })).toHaveLength(2)
+  })
+
+  it("displays the workout time in the configured timezone, not the browser's", () => {
+    // 2026-05-31T18:00:00Z is 2:00 PM in New York and 11:00 AM in Los Angeles.
+    const w = makeWorkout({ id: "tz", startAt: "2026-05-31T18:00:00.000Z" })
+    const { rerender } = render(
+      <WorkoutList workouts={[w]} settings={settings} timezone="America/New_York" />,
+    )
+    expect(screen.getByRole("list")).toHaveTextContent(/2:00\s*PM/)
+
+    rerender(
+      <WorkoutList workouts={[w]} settings={settings} timezone="America/Los_Angeles" />,
+    )
+    expect(screen.getByRole("list")).toHaveTextContent(/11:00\s*AM/)
   })
 
   it("tags every row with its source badge", () => {
@@ -57,7 +71,7 @@ describe("<WorkoutList>", () => {
       makeWorkout({ id: "a" }),
       makeWorkout({ id: "b", source: "outdoor", speedMph: null, inclinePct: null }),
     ]
-    render(<WorkoutList workouts={workouts} settings={settings} />)
+    render(<WorkoutList workouts={workouts} settings={settings} timezone="America/New_York" />)
     const list = screen.getByRole("list")
     expect(list).toHaveTextContent(/treadmill/i)
     expect(list).toHaveTextContent(/outdoor/i)
@@ -70,7 +84,7 @@ describe("<WorkoutList>", () => {
       makeWorkout({ id: "b" }),
       makeWorkout({ id: "c", source: "outdoor", speedMph: null, inclinePct: null }),
     ]
-    render(<WorkoutList workouts={workouts} settings={settings} />)
+    render(<WorkoutList workouts={workouts} settings={settings} timezone="America/New_York" />)
     expect(screen.getAllByRole("listitem")).toHaveLength(3)
 
     await user.click(screen.getByRole("button", { name: /^treadmill$/i }))
@@ -88,7 +102,7 @@ describe("<WorkoutList>", () => {
     const workouts = Array.from({ length: 120 }, (_, i) =>
       makeWorkout({ id: `w-${i}` }),
     )
-    render(<WorkoutList workouts={workouts} settings={settings} />)
+    render(<WorkoutList workouts={workouts} settings={settings} timezone="America/New_York" />)
     expect(screen.getAllByRole("listitem")).toHaveLength(50)
 
     await user.click(screen.getByRole("button", { name: /load more/i }))
@@ -114,7 +128,7 @@ describe("<WorkoutList>", () => {
         }),
       ),
     ]
-    render(<WorkoutList workouts={workouts} settings={settings} />)
+    render(<WorkoutList workouts={workouts} settings={settings} timezone="America/New_York" />)
     await user.click(screen.getByRole("button", { name: /load more/i }))
     expect(screen.getAllByRole("listitem")).toHaveLength(70)
 
