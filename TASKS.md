@@ -191,7 +191,7 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 - [x] **J7** Add error boundaries on each dashboard section
 - [x] **J8** Run Lighthouse on prod; address any a11y issues _(prod Lighthouse: Accessibility 100, Best Practices 100, SEO 100, Performance 63. a11y fixes: CardTitle is a real heading, ingest URL/token + import file inputs labeled)_
 - [x] **J9** Backfill: run the real Apple Health export through `/api/health/import` against prod _(1,774 daily metrics present in the prod DB; Blob upload path for >4MB files deployed + tested. Final browser-upload confirmation on the live site optional — idempotent)_
-- [ ] **J10** Set up Health Auto Export iOS app pointing at prod ingest URL; verify next-day sync arrives
+- [x] **J10** Set up Health Auto Export iOS app pointing at prod ingest URL; verify next-day sync arrives _(verified live: manual export from phone POSTed Jun 16-22 real data to the prod ingest endpoint; landed with steps/distance/calories correct)_
 - [ ] **J11** Tag commit `v1.0`
 
 ---
