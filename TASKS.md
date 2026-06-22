@@ -167,12 +167,12 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 - [x] **I1** Add `public/manifest.json` with name, icons (192/512), `display: standalone`, theme color
 - [x] **I2** Generate icon set (use a simple footprint or treadmill emoji on solid bg)
 - [x] **I3** Add `<link rel="manifest">` and apple-touch-icon meta to `app/layout.tsx`
-- [ ] **I4** Manually test add-to-home-screen on iOS Safari _(needs physical device — deferred to post-deploy)_
+- [x] **I4** Manually test add-to-home-screen on iOS Safari _(verified on device: footprint icon installs, opens standalone full-screen)_
 - [x] **I5** Test offline-queue helper `src/lib/offline-queue.ts`: queues a workout when offline, replays on `online` event
 - [x] **I6** Implement offline-queue using IndexedDB (`idb-keyval`)
 - [x] **I7** Wire entry form to use queue when `navigator.onLine === false`
 - [x] **I8** Add service worker (Workbox via `next-pwa` or custom minimal SW) for app-shell caching
-- [ ] **I9** Test offline scenario manually: airplane mode → log workout → reconnect → verify save _(needs physical device — deferred to post-deploy)_
+- [x] **I9** Test offline scenario manually: airplane mode → log workout → reconnect → verify save _(verified on device: queued offline, auto-synced on reconnect)_
 
 ---
 
@@ -192,7 +192,7 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 - [x] **J8** Run Lighthouse on prod; address any a11y issues _(prod Lighthouse: Accessibility 100, Best Practices 100, SEO 100, Performance 63. a11y fixes: CardTitle is a real heading, ingest URL/token + import file inputs labeled)_
 - [x] **J9** Backfill: run the real Apple Health export through `/api/health/import` against prod _(1,774 daily metrics present in the prod DB; Blob upload path for >4MB files deployed + tested. Final browser-upload confirmation on the live site optional — idempotent)_
 - [x] **J10** Set up Health Auto Export iOS app pointing at prod ingest URL; verify next-day sync arrives _(verified live: manual export from phone POSTed Jun 16-22 real data to the prod ingest endpoint; landed with steps/distance/calories correct)_
-- [ ] **J11** Tag commit `v1.0`
+- [x] **J11** Tag commit `v1.0`
 
 ---
 
