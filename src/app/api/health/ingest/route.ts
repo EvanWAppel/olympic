@@ -120,7 +120,13 @@ export async function POST(req: Request) {
   }
 
   const json = await req.json().catch(() => null)
-  const parsed = Payload.safeParse(json)
+  // Health Auto Export wraps its payload under a `data` key; accept both the
+  // wrapped shape and a bare { metrics, workouts } object.
+  const root =
+    json && typeof json === "object" && "data" in json
+      ? (json as { data: unknown }).data
+      : json
+  const parsed = Payload.safeParse(root)
   if (!parsed.success) {
     return NextResponse.json(
       { error: "invalid_input", details: parsed.error.flatten() },

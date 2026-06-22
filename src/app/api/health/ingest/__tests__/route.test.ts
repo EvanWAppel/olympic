@@ -85,6 +85,21 @@ describe("POST /api/health/ingest", () => {
     expect(w[0].source).toBe("outdoor")
   })
 
+  it("accepts the Health Auto Export shape wrapped under a `data` key", async () => {
+    // The real Health Auto Export app posts { data: { metrics, workouts } }.
+    const res = await POST(makeReq({ data: validBody }))
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.dailyMetricsUpserted).toBe(1)
+    expect(body.workoutsUpserted).toBe(1)
+
+    const [row] = await db
+      .select()
+      .from(dailyMetric)
+      .where(inArray(dailyMetric.date, ["2099-05-29"]))
+    expect(row.steps).toBe(8500)
+  })
+
   it("is idempotent on workouts (same id is not duplicated)", async () => {
     await POST(makeReq(validBody))
     await POST(makeReq(validBody))

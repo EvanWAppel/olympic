@@ -2,7 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 
-const uploadMock = vi.fn(async () => ({ url: "https://blob.example.com/export-xyz.zip" }))
+const uploadMock = vi.fn(async (..._args: unknown[]) => ({
+  url: "https://blob.example.com/export-xyz.zip",
+}))
 vi.mock("@vercel/blob/client", () => ({
   upload: (...args: unknown[]) => uploadMock(...args),
 }))
