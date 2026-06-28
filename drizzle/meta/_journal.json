@@ -15,6 +15,13 @@
       "when": 1780532151571,
       "tag": "0001_marvelous_sunspot",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782683563477,
+      "tag": "0002_modern_the_phantom",
+      "breakpoints": true
     }
   ]
 }
