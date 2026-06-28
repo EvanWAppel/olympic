@@ -15,6 +15,13 @@
       "when": 1780532151571,
       "tag": "0001_marvelous_sunspot",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782683925295,
+      "tag": "0002_mood_checkins",
+      "breakpoints": true
     }
   ]
 }

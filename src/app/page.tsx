@@ -17,6 +17,7 @@ import { WeeklyMilesLine } from "@/components/charts/weekly-miles-line"
 import { YearHeatmap } from "@/components/charts/year-heatmap"
 import { PaceInclineTrend } from "@/components/charts/pace-incline-trend"
 import { EntryFormIsland } from "@/components/entry-form-island"
+import { MoodFormIsland } from "@/components/mood-form-island"
 import { WorkoutList } from "@/components/workout-list"
 import { SectionErrorBoundary } from "@/components/section-error-boundary"
 
@@ -128,6 +129,17 @@ export default async function Home() {
           </CardHeader>
           <CardContent>
             <EntryFormIsland settings={settings} />
+          </CardContent>
+        </Card>
+      </SectionErrorBoundary>
+
+      <SectionErrorBoundary name="How are you feeling?">
+        <Card>
+          <CardHeader>
+            <CardTitle>How are you feeling?</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <MoodFormIsland />
           </CardContent>
         </Card>
       </SectionErrorBoundary>

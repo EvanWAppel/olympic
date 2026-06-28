@@ -52,6 +52,16 @@ export const settings = pgTable("settings", {
     .defaultNow(),
 })
 
+// Daily "how are you feeling?" check-in: a 1-10 score with an optional comment.
+export const moodCheckins = pgTable("mood_checkins", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  score: integer("score").notNull(),
+  comment: text("comment"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+})
+
 export const dailyMetric = pgTable("daily_metric", {
   date: date("date").primaryKey(),
   steps: integer("steps").notNull().default(0),
@@ -70,3 +80,5 @@ export type Settings = typeof settings.$inferSelect
 export type NewSettings = typeof settings.$inferInsert
 export type DailyMetric = typeof dailyMetric.$inferSelect
 export type NewDailyMetric = typeof dailyMetric.$inferInsert
+export type MoodCheckin = typeof moodCheckins.$inferSelect
+export type NewMoodCheckin = typeof moodCheckins.$inferInsert
