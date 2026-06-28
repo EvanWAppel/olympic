@@ -8,7 +8,7 @@ export interface WeekMiles {
   miles: number
 }
 
-function isoWeekStart(dateStr: string): string {
+export function isoWeekStart(dateStr: string): string {
   const [y, m, d] = dateStr.split("-").map(Number)
   const date = new Date(Date.UTC(y, m - 1, d))
   // getUTCDay: Sunday=0..Saturday=6. Shift so Monday=0.
