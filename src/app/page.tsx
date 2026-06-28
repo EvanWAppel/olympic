@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { listWorkouts } from "@/db/workouts.repo"
 import { getSettings } from "@/db/settings.repo"
 import { getDailyTotalsRange } from "@/db/totals.repo"
+import { getMood } from "@/db/mood.repo"
 import { addDays, localDateKey } from "@/lib/dates"
 import { computeStreak } from "@/lib/streak"
 import { computePRs } from "@/lib/prs"
@@ -17,6 +18,7 @@ import { WeeklyMilesLine } from "@/components/charts/weekly-miles-line"
 import { YearHeatmap } from "@/components/charts/year-heatmap"
 import { PaceInclineTrend } from "@/components/charts/pace-incline-trend"
 import { EntryFormIsland } from "@/components/entry-form-island"
+import { MoodCardIsland } from "@/components/mood-card-island"
 import { WorkoutList } from "@/components/workout-list"
 import { SectionErrorBoundary } from "@/components/section-error-boundary"
 
@@ -29,10 +31,15 @@ export default async function Home() {
   const yearStart = `${today.slice(0, 4)}-01-01`
   const rangeStart = addDays(today, -364)
 
-  const [totals, workouts] = await Promise.all([
+  const [totals, workouts, mood] = await Promise.all([
     getDailyTotalsRange({ startDate: rangeStart, endDate: today, timezone }),
     listWorkouts(),
+    getMood(today),
   ])
+
+  const moodInitial = mood
+    ? { score: mood.score, comment: mood.comment ?? undefined }
+    : undefined
 
   const settings = {
     weightLb: Number(s.weightLb),
@@ -128,6 +135,17 @@ export default async function Home() {
           </CardHeader>
           <CardContent>
             <EntryFormIsland settings={settings} />
+          </CardContent>
+        </Card>
+      </SectionErrorBoundary>
+
+      <SectionErrorBoundary name="Mood check-in">
+        <Card>
+          <CardHeader>
+            <CardTitle>How are you feeling today?</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <MoodCardIsland initial={moodInitial} />
           </CardContent>
         </Card>
       </SectionErrorBoundary>
