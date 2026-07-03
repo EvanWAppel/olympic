@@ -1,6 +1,6 @@
 # minderbinder — requirements addressed
 
-## Issue #2: Mental health feature
-<!-- minderbinder:issue-2 -->
+## Issue #4: World events overlay
+<!-- minderbinder:issue-4 -->
 
-I want the app to ask me every day how I'm feeling on a scale of 0 to 10 with an option to add a comment
+I want to overlay some significant news events over the charts we have. Occasionally to be updated as more world events occur

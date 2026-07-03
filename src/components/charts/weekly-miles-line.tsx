@@ -11,6 +11,8 @@ import {
 } from "recharts"
 import type { WeekMiles } from "@/lib/chart-data"
 import { rollingAverage } from "@/lib/chart-data"
+import { eventMarkersFor } from "@/lib/world-events"
+import { eventReferenceLines } from "./event-reference-lines"
 
 interface Props {
   weeks: WeekMiles[]
@@ -25,6 +27,10 @@ export function WeeklyMilesLine({ weeks, rollingWindow = 4 }: Props) {
     miles: Number(s.miles.toFixed(2)),
     avg: avg[i].avg === null ? null : Number(avg[i].avg!.toFixed(2)),
   }))
+  const events = eventMarkersFor(
+    weeks.map((w) => w.weekStart),
+    "week",
+  )
 
   return (
     <div className="h-72 w-full">
@@ -59,6 +65,7 @@ export function WeeklyMilesLine({ weeks, rollingWindow = 4 }: Props) {
             dot={false}
             connectNulls={false}
           />
+          {eventReferenceLines(events)}
         </LineChart>
       </ResponsiveContainer>
     </div>
