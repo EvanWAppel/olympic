@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { TreadmillEntryForm, type TreadmillEntryValues } from "./treadmill-entry-form"
+import { localDateKey } from "@/lib/dates"
 
 type Workout = {
   id: string
@@ -236,10 +237,12 @@ export function WorkoutList({ workouts, settings, timezone }: Props) {
               settings={settings}
               isSubmitting={busy}
               submitLabel="Update"
+              today={localDateKey(new Date(), timezone)}
               initial={{
                 speedMph: String(editing.speedMph ?? ""),
                 inclinePct: String(editing.inclinePct ?? ""),
                 minutes: String(editing.minutes ?? ""),
+                date: localDateKey(new Date(editing.startAt), timezone),
                 notes: editing.notes ?? "",
               }}
               onSubmit={handleEditSubmit}

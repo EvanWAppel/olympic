@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { deleteWorkout, updateWorkout, type WorkoutUpdate } from "@/db/workouts.repo"
+import {
+  deleteWorkout,
+  getWorkout,
+  updateWorkout,
+  type WorkoutUpdate,
+} from "@/db/workouts.repo"
+import { getSettings } from "@/db/settings.repo"
+import { daysBetween, localDateKey } from "@/lib/dates"
 
 const PatchSchema = z.object({
   minutes: z.number().positive().max(600).optional(),
@@ -9,6 +16,7 @@ const PatchSchema = z.object({
   distanceMi: z.number().nonnegative().max(100).optional(),
   steps: z.number().int().nonnegative().max(1_000_000).optional(),
   calories: z.number().nonnegative().max(10_000).optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   notes: z.string().max(2000).nullable().optional(),
 })
 
@@ -35,11 +43,23 @@ export async function PATCH(
   if (d.calories !== undefined) patch.calories = d.calories.toFixed(2)
   if (d.notes !== undefined) patch.notes = d.notes
 
-  // If minutes changed, recompute start/end to keep the dedup window correct.
-  if (d.minutes !== undefined) {
-    const endAt = new Date()
+  // If the date or duration changed, recompute start/end. Keep the original
+  // time-of-day by shifting whole days, so a backdated workout stays on its day.
+  if (d.date !== undefined || d.minutes !== undefined) {
+    const existing = await getWorkout(id)
+    if (!existing) return NextResponse.json({ error: "not_found" }, { status: 404 })
+
+    const { timezone } = await getSettings()
+    const currentKey = localDateKey(existing.endAt, timezone)
+    const targetKey = d.date ?? currentKey
+    const dayShift = daysBetween(currentKey, targetKey)
+
+    const endAt = new Date(existing.endAt.getTime() + dayShift * 86_400_000)
     patch.endAt = endAt
-    patch.startAt = new Date(endAt.getTime() - d.minutes * 60_000)
+    patch.startAt =
+      d.minutes !== undefined
+        ? new Date(endAt.getTime() - d.minutes * 60_000)
+        : new Date(existing.startAt.getTime() + dayShift * 86_400_000)
   }
 
   const row = await updateWorkout(id, patch)

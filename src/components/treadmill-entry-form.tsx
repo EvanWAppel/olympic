@@ -21,6 +21,8 @@ export interface TreadmillEntryValues {
   distanceMi: number
   steps: number
   calories: number
+  /** Local calendar day the workout happened, YYYY-MM-DD. Defaults to today. */
+  date: string
   notes?: string
 }
 
@@ -28,6 +30,7 @@ interface FormFields {
   speedMph: string
   inclinePct: string
   minutes: string
+  date: string
   notes: string
 }
 
@@ -42,6 +45,14 @@ interface Props {
   isSubmitting?: boolean
   initial?: Partial<FormFields>
   submitLabel?: string
+  /** Today's local date (YYYY-MM-DD) used as the default and max for the date field. */
+  today?: string
+}
+
+/** Today's YYYY-MM-DD in the browser's local zone — fallback when `today` isn't provided. */
+function browserToday(): string {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
 }
 
 function parsePositive(value: string, label: string, max: number): string | number {
@@ -68,12 +79,15 @@ export function TreadmillEntryForm({
   isSubmitting,
   initial,
   submitLabel,
+  today,
 }: Props) {
+  const maxDate = today ?? browserToday()
   const form = useForm<FormFields>({
     defaultValues: {
       speedMph: initial?.speedMph ?? "",
       inclinePct: initial?.inclinePct ?? "",
       minutes: initial?.minutes ?? "",
+      date: initial?.date ?? maxDate,
       notes: initial?.notes ?? "",
     },
   })
@@ -85,6 +99,7 @@ export function TreadmillEntryForm({
           const speed = parsePositive(raw.speedMph, "Speed", 20)
           const incline = parseNonNegative(raw.inclinePct, "Incline", 30)
           const minutes = parsePositive(raw.minutes, "Minutes", 600)
+          const date = raw.date.trim()
 
           let valid = true
           if (typeof speed === "string") {
@@ -97,6 +112,13 @@ export function TreadmillEntryForm({
           }
           if (typeof minutes === "string") {
             form.setError("minutes", { message: minutes })
+            valid = false
+          }
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            form.setError("date", { message: "Pick a valid date" })
+            valid = false
+          } else if (date > maxDate) {
+            form.setError("date", { message: "Date can't be in the future" })
             valid = false
           }
           if (!valid) return
@@ -121,6 +143,7 @@ export function TreadmillEntryForm({
             distanceMi,
             steps,
             calories,
+            date,
             ...(trimmedNotes !== "" && { notes: trimmedNotes }),
           })
           form.reset()
@@ -180,6 +203,19 @@ export function TreadmillEntryForm({
                   placeholder="45"
                   {...field}
                 />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date</FormLabel>
+              <FormControl>
+                <Input type="date" max={maxDate} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

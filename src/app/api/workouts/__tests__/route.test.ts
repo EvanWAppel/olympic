@@ -82,6 +82,40 @@ describe("POST /api/workouts", () => {
     expect(body.notes).toBeNull()
   })
 
+  it("backdates start/end to the given day", async () => {
+    const { getSettings } = await import("@/db/settings.repo")
+    const { localDateKey, daysBetween } = await import("@/lib/dates")
+    const { timezone } = await getSettings()
+
+    const before = Date.now()
+    const daysBack = daysBetween("2020-01-15", localDateKey(new Date(before), timezone))
+
+    const req = new Request("http://localhost/api/workouts", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ...validBody, date: "2020-01-15" }),
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(201)
+    const body = await res.json()
+    createdIds.push(body.id)
+
+    const endMs = new Date(body.endAt).getTime()
+    expect(Math.abs(endMs - (before - daysBack * 86_400_000))).toBeLessThan(5_000)
+    const windowMs = endMs - new Date(body.startAt).getTime()
+    expect(windowMs).toBe(45 * 60_000)
+  })
+
+  it("rejects a future date", async () => {
+    const req = new Request("http://localhost/api/workouts", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ...validBody, date: "2999-01-01" }),
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+  })
+
   it("returns 400 on invalid body", async () => {
     const req = new Request("http://localhost/api/workouts", {
       method: "POST",

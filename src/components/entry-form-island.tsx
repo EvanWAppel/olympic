@@ -8,6 +8,8 @@ import { enqueueWorkout, registerOnlineReplay } from "@/lib/offline-queue"
 
 interface Props {
   settings: { weightLb: number; strideIn: number }
+  /** Today's local date (YYYY-MM-DD) in the owner's configured timezone. */
+  today?: string
 }
 
 async function postWorkout(payload: unknown): Promise<boolean> {
@@ -19,7 +21,7 @@ async function postWorkout(payload: unknown): Promise<boolean> {
   return res.ok
 }
 
-export function EntryFormIsland({ settings }: Props) {
+export function EntryFormIsland({ settings, today }: Props) {
   const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
 
@@ -71,6 +73,7 @@ export function EntryFormIsland({ settings }: Props) {
       settings={settings}
       onSubmit={handleSubmit}
       isSubmitting={submitting}
+      today={today}
     />
   )
 }

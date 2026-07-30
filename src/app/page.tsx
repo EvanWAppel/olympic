@@ -134,7 +134,7 @@ export default async function Home() {
             <CardTitle>Log a workout</CardTitle>
           </CardHeader>
           <CardContent>
-            <EntryFormIsland settings={settings} />
+            <EntryFormIsland settings={settings} today={today} />
           </CardContent>
         </Card>
       </SectionErrorBoundary>

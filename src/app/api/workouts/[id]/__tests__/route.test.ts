@@ -72,6 +72,29 @@ describe("/api/workouts/[id]", () => {
     expect(body.notes).toBe("updated")
   })
 
+  it("PATCH moves the workout to a new date, preserving time-of-day", async () => {
+    const { getSettings } = await import("@/db/settings.repo")
+    const { localDateKey } = await import("@/lib/dates")
+    const { timezone } = await getSettings()
+
+    const row = await seed()
+    const res = await PATCH(
+      new Request(`http://localhost/api/workouts/${row.id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ date: "2099-05-28" }),
+      }),
+      { params: Promise.resolve({ id: row.id }) },
+    )
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(localDateKey(new Date(body.startAt), timezone)).toBe("2099-05-28")
+    expect(localDateKey(new Date(body.endAt), timezone)).toBe("2099-05-28")
+    // window unchanged (45 min) since minutes wasn't touched
+    const windowMs = new Date(body.endAt).getTime() - new Date(body.startAt).getTime()
+    expect(windowMs).toBe(45 * 60_000)
+  })
+
   it("PATCH 404 on missing", async () => {
     const res = await PATCH(
       new Request("http://localhost/api/workouts/00000000-0000-0000-0000-000000000000", {
