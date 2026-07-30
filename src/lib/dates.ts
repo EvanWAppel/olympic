@@ -19,3 +19,12 @@ export function addDays(dateStr: string, days: number): string {
   dt.setUTCDate(dt.getUTCDate() + days)
   return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}-${String(dt.getUTCDate()).padStart(2, "0")}`
 }
+
+/** Whole calendar days from `fromStr` to `toStr` (both YYYY-MM-DD). Positive when `toStr` is later. */
+export function daysBetween(fromStr: string, toStr: string): number {
+  const [fy, fm, fd] = fromStr.split("-").map(Number)
+  const [ty, tm, td] = toStr.split("-").map(Number)
+  const from = Date.UTC(fy, fm - 1, fd)
+  const to = Date.UTC(ty, tm - 1, td)
+  return Math.round((to - from) / 86_400_000)
+}

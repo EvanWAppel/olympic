@@ -29,20 +29,24 @@ export function YearHeatmap({ data, maxScale = 12_000 }: Props) {
     level: level(d.steps, maxScale),
   }))
 
+  // A full year is wider than a phone screen. Keep it in its own horizontal
+  // scroll box so it never forces the whole page to scroll sideways.
   return (
-    <ActivityCalendar
-      data={transformed}
-      blockSize={11}
-      blockMargin={3}
-      fontSize={11}
-      labels={{
-        legend: { less: "Quiet", more: "Active" },
-        totalCount: "{{count}} steps in {{year}}",
-      }}
-      theme={{
-        light: ["#ebedf0", "#c6e48b", "#7bc96f", "#239a3b", "#196127"],
-        dark: ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"],
-      }}
-    />
+    <div className="overflow-x-auto">
+      <ActivityCalendar
+        data={transformed}
+        blockSize={11}
+        blockMargin={3}
+        fontSize={11}
+        labels={{
+          legend: { less: "Quiet", more: "Active" },
+          totalCount: "{{count}} steps in {{year}}",
+        }}
+        theme={{
+          light: ["#ebedf0", "#c6e48b", "#7bc96f", "#239a3b", "#196127"],
+          dark: ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"],
+        }}
+      />
+    </div>
   )
 }

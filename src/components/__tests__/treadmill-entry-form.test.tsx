@@ -9,13 +9,81 @@ const settings = {
 }
 
 describe("<TreadmillEntryForm>", () => {
-  it("renders speed, incline, minutes, notes fields and a save button", () => {
+  it("renders speed, incline, minutes, date, notes fields and a save button", () => {
     render(<TreadmillEntryForm settings={settings} onSubmit={vi.fn()} />)
     expect(screen.getByLabelText(/speed/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/incline/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/minutes/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/^date$/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/notes/i)).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument()
+  })
+
+  it("defaults the date to `today` and passes it through", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(
+      <TreadmillEntryForm
+        settings={settings}
+        onSubmit={onSubmit}
+        today="2026-07-29"
+      />,
+    )
+
+    expect(screen.getByLabelText(/^date$/i)).toHaveValue("2026-07-29")
+
+    await user.type(screen.getByLabelText(/speed/i), "3.5")
+    await user.type(screen.getByLabelText(/incline/i), "0")
+    await user.type(screen.getByLabelText(/minutes/i), "30")
+    await user.click(screen.getByRole("button", { name: /save/i }))
+
+    expect(onSubmit).toHaveBeenCalledTimes(1)
+    expect(onSubmit.mock.calls[0][0].date).toBe("2026-07-29")
+  })
+
+  it("lets you backdate to an earlier day", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(
+      <TreadmillEntryForm
+        settings={settings}
+        onSubmit={onSubmit}
+        today="2026-07-29"
+      />,
+    )
+
+    const dateInput = screen.getByLabelText(/^date$/i)
+    await user.clear(dateInput)
+    await user.type(dateInput, "2026-07-27")
+    await user.type(screen.getByLabelText(/speed/i), "3.5")
+    await user.type(screen.getByLabelText(/incline/i), "0")
+    await user.type(screen.getByLabelText(/minutes/i), "30")
+    await user.click(screen.getByRole("button", { name: /save/i }))
+
+    expect(onSubmit).toHaveBeenCalledTimes(1)
+    expect(onSubmit.mock.calls[0][0].date).toBe("2026-07-27")
+  })
+
+  it("blocks a future date", async () => {
+    const onSubmit = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <TreadmillEntryForm
+        settings={settings}
+        onSubmit={onSubmit}
+        today="2026-07-29"
+      />,
+    )
+
+    const dateInput = screen.getByLabelText(/^date$/i)
+    await user.clear(dateInput)
+    await user.type(dateInput, "2026-08-01")
+    await user.type(screen.getByLabelText(/speed/i), "3.5")
+    await user.type(screen.getByLabelText(/incline/i), "0")
+    await user.type(screen.getByLabelText(/minutes/i), "30")
+    await user.click(screen.getByRole("button", { name: /save/i }))
+
+    expect(onSubmit).not.toHaveBeenCalled()
   })
 
   it("calls onSubmit with computed distance/steps/calories", async () => {
