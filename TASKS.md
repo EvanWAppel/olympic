@@ -237,28 +237,28 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 > Depends on **K7, K8** (session + `requireOwner`). Applies the guards and the public read scoping.
 
-- [ ] **L1** Test `requireOwner()` guard: owner-only routes return 401/redirect without a valid session, 200 with one
-- [ ] **L2** Apply `requireOwner()` to `POST/PATCH/DELETE /api/workouts*`, `GET/POST /api/settings`, `POST /api/health/import`, `GET /api/export`, `DELETE /api/all-data`, and the `/settings` page
-- [ ] **L3** Test `GET /api/health/secret` now requires a session (closes the audit-flagged hole: it previously returned the ingest secret unauthenticated)
-- [ ] **L4** Gate / remove the standalone secret-read route; surface the secret only through the owner-guarded Settings flow
-- [ ] **L5** Test public dashboard DTOs: serializers for cards/charts/workout-list/PRs return only whitelisted fields and **never** include `health_ingest_secret` or settings credentials
-- [ ] **L6** Implement read DTOs / field whitelists for all public dashboard endpoints
-- [ ] **L7** Test `src/app/page.tsx` renders read-only for anonymous requests and shows edit/delete + Settings affordances only when a session is present
-- [ ] **L8** Implement owner-mode vs public-mode rendering (server-side session check); confirm `/api/health/ingest` bearer path is untouched by session logic
-- [ ] **L9** Add `robots.txt` / metadata: allow `/` and `/about`, disallow `/app`, `/settings`, `/login`
+- [x] **L1** Test `requireOwner()` guard: owner-only routes return 401/redirect without a valid session, 200 with one _(`api-guard.test.ts` unit test + per-route 401 cases on workouts, settings, export, all-data, import, secret)_
+- [x] **L2** Apply `requireOwner()` to `POST/PATCH/DELETE /api/workouts*`, `GET/POST(PATCH) /api/settings`, `POST /api/health/import`, `GET /api/export`, `DELETE /api/all-data`, `/api/health/blob-upload`, and the `/settings` page _(via `requireOwnerOr401()` guard clause in `src/lib/api-guard.ts`; settings page redirects to `/login`)_
+- [x] **L3** Test `GET /api/health/secret` now requires a session (closes the audit-flagged hole: it previously returned the ingest secret unauthenticated)
+- [x] **L4** Gate the standalone secret-read route (GET + POST now behind `requireOwnerOr401()`); the secret is surfaced through the owner-guarded Settings flow
+- [x] **L5** Test public DTOs: `publicSettings()` drops `health_ingest_secret`; `publicWorkout()` exposes only whitelisted fields (`dto.test.ts`)
+- [x] **L6** Implement read DTOs / field whitelists in `src/lib/dto.ts`; `GET /api/workouts` (public) serializes through `publicWorkout`
+- [x] **L7** Test `<WorkoutList>` renders read-only for anonymous (no edit/delete) and shows controls only in owner mode; verified live as anonymous on `/` and `/settings`→`/login`
+- [x] **L8** Implement owner-mode vs public-mode rendering (server-side `getSession()` in layout + page); `/api/health/ingest` bearer path untouched by session logic
+- [x] **L9** Add `src/app/robots.ts` + `metadataBase`: allow `/`, `/about`; disallow `/settings`, `/login`, `/api/`. `/settings` also `robots: noindex`
 
 ### Group M: Recruiter surface (header identity + /about)
 
 > Mostly independent; depends on **K15/L7** only for hiding the login entrance and owner-mode affordances. Can parallelize with L.
 
 - [x] **M1** Copy `~/Documents/career/resumes/resume_ai_engineer.pdf` → `public/resume.pdf` _(done)_
-- [ ] **M2** Test `<SiteHeader>` renders name + links (GitHub `EvanWAppel/olympic`, LinkedIn `evan-appel-8885569b`, Resume `/resume.pdf`, email `mailto:appelew@gmail.com`, personal site) and an "About this build" link; renders no login button
-- [ ] **M3** Implement `src/components/site-header.tsx`; mount in `app/layout.tsx`. _(Personal-site deployed URL is TBD — link the `enki` repo as a placeholder until the live domain is confirmed.)_
-- [ ] **M4** Test live-metrics helper `getAboutMetrics()` — total workouts, days of data, current streak, test count (queried, not hardcoded)
-- [ ] **M5** Implement `getAboutMetrics()` (reuse existing totals/streak repos)
-- [ ] **M6** Build `src/app/about/page.tsx` — personal narrative, architecture + data-flow diagram, decision log/tradeoffs, stack + live metrics (PRD §8.2)
-- [ ] **M7** Author the architecture/data-flow diagram (SVG or static asset) showing Apple Health → ingest → dedup → dashboard
-- [ ] **M8** Snapshot/visual check the public dashboard + `/about` as anonymous: no empty states, no broken charts, no auth wall
+- [x] **M2** Test `<SiteHeader>` renders name + links (GitHub `EvanWAppel/olympic`, LinkedIn `evan-appel-8885569b`, Resume `/resume.pdf`, email `mailto:appelew@gmail.com`, personal site) and an "About this build" link; renders no login button _(`site-header.test.tsx`)_
+- [x] **M3** Implement `src/components/site-header.tsx`; mounted in `app/layout.tsx` with owner-only Settings link. _(Personal-site links the `enki` repo as a placeholder until the live domain is confirmed.)_
+- [x] **M4** Test live-metrics helper `getAboutMetrics()` — total workouts, days of data, current streak, test count (queried, not hardcoded; DI-based `about-metrics.test.ts`)
+- [x] **M5** Implement `getAboutMetrics()` (reuses totals/streak repos; test count captured at build via `scripts/count-tests.mjs` → `test-count.generated.ts`)
+- [x] **M6** Build `src/app/about/page.tsx` — personal narrative, architecture + data-flow diagram, decision log/tradeoffs, stack + live metrics (PRD §8.2)
+- [x] **M7** Author the architecture/data-flow diagram (inline SVG) showing Apple Health → ingest → dedup → dashboard (`src/components/about/architecture-diagram.tsx`)
+- [x] **M8** Visual check the public dashboard + `/about` as anonymous: real data, no empty states, no auth wall, read-only list — verified in browser
 
 ### Group N: Going-public cutover (FINAL, sequential)
 

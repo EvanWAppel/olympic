@@ -3,6 +3,7 @@ import { asc } from "drizzle-orm"
 import { db } from "@/db/client"
 import { dailyMetric, workouts } from "@/db/schema"
 import { toCsv } from "@/lib/csv"
+import { requireOwnerOr401 } from "@/lib/api-guard"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -33,6 +34,9 @@ const METRIC_COLUMNS = [
 ] as const
 
 export async function GET() {
+  const denied = await requireOwnerOr401()
+  if (denied) return denied
+
   const [workoutRows, metricRows] = await Promise.all([
     db.select().from(workouts).orderBy(asc(workouts.startAt)),
     db.select().from(dailyMetric).orderBy(asc(dailyMetric.date)),

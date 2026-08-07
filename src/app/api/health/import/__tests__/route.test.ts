@@ -1,11 +1,15 @@
 // @vitest-environment node
-import { afterEach, beforeAll, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 import { config } from "dotenv"
 import { readFile } from "node:fs/promises"
 import path from "node:path"
 import AdmZip from "adm-zip"
 
 config({ path: ".env.local" })
+
+// Owner-only route: mock the session so the guard sees an authenticated owner.
+vi.mock("@/lib/session", () => ({ getSession: vi.fn() }))
+import { getSession } from "@/lib/session"
 
 let POST: (req: Request) => Promise<Response>
 let db: typeof import("@/db/client").db
@@ -23,6 +27,10 @@ beforeAll(async () => {
   workouts = (await import("@/db/schema")).workouts
   dailyMetric = (await import("@/db/schema")).dailyMetric
   inArray = (await import("drizzle-orm")).inArray
+})
+
+beforeEach(() => {
+  vi.mocked(getSession).mockResolvedValue({ sub: "owner" })
 })
 
 afterEach(async () => {
@@ -47,6 +55,12 @@ async function buildRequest(file: Blob): Promise<Request> {
 }
 
 describe("POST /api/health/import", () => {
+  it("returns 401 without an owner session", async () => {
+    vi.mocked(getSession).mockResolvedValue(null)
+    const res = await POST(await buildRequest(await buildZip()))
+    expect(res.status).toBe(401)
+  })
+
   it("accepts a zipped export and returns counts", async () => {
     const res = await POST(await buildRequest(await buildZip()))
     expect(res.status).toBe(200)

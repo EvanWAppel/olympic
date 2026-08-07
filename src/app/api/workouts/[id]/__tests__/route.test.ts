@@ -1,8 +1,12 @@
 // @vitest-environment node
-import { afterEach, beforeAll, describe, expect, it } from "vitest"
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 import { config } from "dotenv"
 
 config({ path: ".env.local" })
+
+// Owner-only routes: mock the session so the guard sees an authenticated owner.
+vi.mock("@/lib/session", () => ({ getSession: vi.fn() }))
+import { getSession } from "@/lib/session"
 
 let PATCH: (req: Request, ctx: { params: Promise<{ id: string }> }) => Promise<Response>
 let DELETE: (req: Request, ctx: { params: Promise<{ id: string }> }) => Promise<Response>
@@ -21,6 +25,10 @@ beforeAll(async () => {
   workouts = (await import("@/db/schema")).workouts
   inArray = (await import("drizzle-orm")).inArray
   createWorkout = (await import("@/db/workouts.repo")).createWorkout
+})
+
+beforeEach(() => {
+  vi.mocked(getSession).mockResolvedValue({ sub: "owner" })
 })
 
 afterEach(async () => {
@@ -47,6 +55,25 @@ async function seed() {
 }
 
 describe("/api/workouts/[id]", () => {
+  it("returns 401 for PATCH and DELETE without an owner session", async () => {
+    vi.mocked(getSession).mockResolvedValue(null)
+    const id = "00000000-0000-0000-0000-000000000000"
+    const patchRes = await PATCH(
+      new Request(`http://localhost/api/workouts/${id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ notes: "x" }),
+      }),
+      { params: Promise.resolve({ id }) },
+    )
+    expect(patchRes.status).toBe(401)
+    const deleteRes = await DELETE(
+      new Request(`http://localhost/api/workouts/${id}`, { method: "DELETE" }),
+      { params: Promise.resolve({ id }) },
+    )
+    expect(deleteRes.status).toBe(401)
+  })
+
   it("PATCH updates editable fields", async () => {
     const row = await seed()
     const res = await PATCH(
