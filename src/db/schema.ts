@@ -65,6 +65,20 @@ export const dailyMetric = pgTable("daily_metric", {
     .defaultNow(),
 })
 
+// Daily mental-health check-in: one mood score (0–10) per calendar date,
+// with an optional free-text comment.
+export const dailyMood = pgTable("daily_mood", {
+  date: date("date").primaryKey(),
+  score: integer("score").notNull(),
+  comment: text("comment"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+})
+
 // --- v2: single-user passkey auth (PRD §7) ---
 
 // One human (me), but multiple registered devices allowed (iPhone + laptop).
@@ -101,6 +115,8 @@ export type Settings = typeof settings.$inferSelect
 export type NewSettings = typeof settings.$inferInsert
 export type DailyMetric = typeof dailyMetric.$inferSelect
 export type NewDailyMetric = typeof dailyMetric.$inferInsert
+export type DailyMood = typeof dailyMood.$inferSelect
+export type NewDailyMood = typeof dailyMood.$inferInsert
 export type WebauthnCredential = typeof webauthnCredential.$inferSelect
 export type NewWebauthnCredential = typeof webauthnCredential.$inferInsert
 export type WebauthnChallenge = typeof webauthnChallenge.$inferSelect

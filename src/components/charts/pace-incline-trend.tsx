@@ -9,6 +9,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import { eventMarkersFor } from "@/lib/world-events"
+import { eventReferenceLines } from "./event-reference-lines"
 
 export interface PaceInclinePoint {
   weekStart: string
@@ -25,6 +27,10 @@ export function PaceInclineTrend({ data, metric }: Props) {
   const key = metric === "speed" ? "avgSpeedMph" : "avgInclinePct"
   const label = metric === "speed" ? "Avg speed (mph)" : "Avg incline (%)"
   const color = metric === "speed" ? "hsl(220, 90%, 56%)" : "hsl(30, 90%, 50%)"
+  const events = eventMarkersFor(
+    data.map((d) => d.weekStart),
+    "week",
+  )
 
   return (
     <div className="h-64 w-full">
@@ -50,6 +56,7 @@ export function PaceInclineTrend({ data, metric }: Props) {
             dot={{ r: 2 }}
             connectNulls={false}
           />
+          {eventReferenceLines(events)}
         </LineChart>
       </ResponsiveContainer>
     </div>

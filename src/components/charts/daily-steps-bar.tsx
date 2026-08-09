@@ -11,6 +11,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import { eventMarkersFor } from "@/lib/world-events"
+import { eventReferenceLines } from "./event-reference-lines"
 
 export interface DailyStepsPoint {
   date: string
@@ -24,6 +26,10 @@ interface Props {
 }
 
 export function DailyStepsBar({ data, goal }: Props) {
+  const events = eventMarkersFor(
+    data.map((d) => d.date),
+    "day",
+  )
   return (
     <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -43,6 +49,7 @@ export function DailyStepsBar({ data, goal }: Props) {
           <Legend wrapperStyle={{ fontSize: "0.75rem" }} />
           <Bar dataKey="treadmillSteps" name="Treadmill" stackId="a" fill="hsl(220, 90%, 56%)" />
           <Bar dataKey="outdoorSteps" name="Outdoor" stackId="a" fill="hsl(140, 65%, 50%)" />
+          {eventReferenceLines(events)}
           {goal && (
             <ReferenceLine
               y={goal}

@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Integration tests run against a Neon branch. When a DATABASE_URL secret is
+    # configured, the test step runs; otherwise it is skipped (not failed), so
+    # lint + typecheck still gate every push.
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm run lint
+      - name: Typecheck
+        run: pnpm run typecheck
+      - name: Test (integration — needs Neon DATABASE_URL secret)
+        if: ${{ env.DATABASE_URL != '' }}
+        run: pnpm run test:run
