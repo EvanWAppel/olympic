@@ -89,4 +89,9 @@ describe("POST /api/mood", () => {
     expect(body.date).toBe(today)
     expect(body.score).toBe(4)
   })
+
+  it("GET returns 401 without an owner session", async () => {
+    vi.mocked(getSession).mockResolvedValue(null)
+    expect((await GET()).status).toBe(401)
+  })
 })

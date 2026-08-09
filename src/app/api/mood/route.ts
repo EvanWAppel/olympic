@@ -34,7 +34,11 @@ export async function POST(req: Request) {
   return NextResponse.json(row, { status: 201 })
 }
 
+// Owner-only read: mental-health data is never exposed to the public surface.
 export async function GET() {
+  const denied = await requireOwnerOr401()
+  if (denied) return denied
+
   const { timezone } = await getSettings()
   const date = localDateKey(new Date(), timezone)
   const row = await getMood(date)
