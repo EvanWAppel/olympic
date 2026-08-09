@@ -8,6 +8,7 @@ import {
   integer,
   date,
   boolean,
+  bigint,
 } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
@@ -78,6 +79,36 @@ export const dailyMood = pgTable("daily_mood", {
     .defaultNow(),
 })
 
+// --- v2: single-user passkey auth (PRD §7) ---
+
+// One human (me), but multiple registered devices allowed (iPhone + laptop).
+export const webauthnCredential = pgTable("webauthn_credential", {
+  // Credential ID, base64url-encoded (as returned by the authenticator).
+  id: text("id").primaryKey(),
+  // COSE public key, base64url-encoded.
+  publicKey: text("public_key").notNull(),
+  // Signature counter; a regression signals a cloned authenticator.
+  counter: bigint("counter", { mode: "number" }).notNull().default(0),
+  transports: text("transports").array(),
+  deviceLabel: text("device_label"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+})
+
+export const webauthnChallengeType = pgEnum("webauthn_challenge_type", [
+  "registration",
+  "authentication",
+])
+
+// Short-lived, single-use ceremony challenges (consumed on read, ≤5 min TTL).
+export const webauthnChallenge = pgTable("webauthn_challenge", {
+  challenge: text("challenge").primaryKey(),
+  type: webauthnChallengeType("type").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+})
+
 export type Workout = typeof workouts.$inferSelect
 export type NewWorkout = typeof workouts.$inferInsert
 export type Settings = typeof settings.$inferSelect
@@ -86,3 +117,7 @@ export type DailyMetric = typeof dailyMetric.$inferSelect
 export type NewDailyMetric = typeof dailyMetric.$inferInsert
 export type DailyMood = typeof dailyMood.$inferSelect
 export type NewDailyMood = typeof dailyMood.$inferInsert
+export type WebauthnCredential = typeof webauthnCredential.$inferSelect
+export type NewWebauthnCredential = typeof webauthnCredential.$inferInsert
+export type WebauthnChallenge = typeof webauthnChallenge.$inferSelect
+export type NewWebauthnChallenge = typeof webauthnChallenge.$inferInsert

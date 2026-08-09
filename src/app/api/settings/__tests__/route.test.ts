@@ -1,8 +1,12 @@
 // @vitest-environment node
-import { afterAll, beforeAll, describe, expect, it } from "vitest"
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 import { config } from "dotenv"
 
 config({ path: ".env.local" })
+
+// Owner-only route (exposes the ingest secret): mock an authenticated session.
+vi.mock("@/lib/session", () => ({ getSession: vi.fn() }))
+import { getSession } from "@/lib/session"
 
 let GET: (req: Request) => Promise<Response>
 let PATCH: (req: Request) => Promise<Response>
@@ -34,7 +38,25 @@ afterAll(async () => {
   }
 })
 
+beforeEach(() => {
+  vi.mocked(getSession).mockResolvedValue({ sub: "owner" })
+})
+
 describe("/api/settings", () => {
+  it("returns 401 for GET and PATCH without an owner session", async () => {
+    vi.mocked(getSession).mockResolvedValue(null)
+    const getRes = await GET(new Request("http://localhost/api/settings"))
+    expect(getRes.status).toBe(401)
+    const patchRes = await PATCH(
+      new Request("http://localhost/api/settings", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ weightLb: 188 }),
+      }),
+    )
+    expect(patchRes.status).toBe(401)
+  })
+
   it("GET returns the settings row", async () => {
     const res = await GET(new Request("http://localhost/api/settings"))
     expect(res.status).toBe(200)

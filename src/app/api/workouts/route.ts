@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { createWorkout, listWorkouts } from "@/db/workouts.repo"
 import { getSettings } from "@/db/settings.repo"
+import { requireOwnerOr401 } from "@/lib/api-guard"
+import { publicWorkout } from "@/lib/dto"
 import { daysBetween, localDateKey } from "@/lib/dates"
 
 const InputSchema = z.object({
@@ -16,6 +18,9 @@ const InputSchema = z.object({
 })
 
 export async function POST(req: Request) {
+  const denied = await requireOwnerOr401()
+  if (denied) return denied
+
   const json = await req.json().catch(() => null)
   const parsed = InputSchema.safeParse(json)
   if (!parsed.success) {
@@ -58,7 +63,9 @@ export async function POST(req: Request) {
   return NextResponse.json(row, { status: 201 })
 }
 
+// Public read (PRD §6): the workout list is visible to anonymous visitors.
+// Serialized through the DTO whitelist so no sensitive field can leak.
 export async function GET() {
   const rows = await listWorkouts()
-  return NextResponse.json(rows)
+  return NextResponse.json(rows.map(publicWorkout))
 }

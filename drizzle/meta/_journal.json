@@ -22,6 +22,13 @@
       "when": 1782683563477,
       "tag": "0002_modern_the_phantom",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786233739720,
+      "tag": "0003_third_luke_cage",
+      "breakpoints": true
     }
   ]
 }

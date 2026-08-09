@@ -1,9 +1,13 @@
 // @vitest-environment node
-import { afterEach, beforeAll, describe, expect, it } from "vitest"
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 import { config } from "dotenv"
 import AdmZip from "adm-zip"
 
 config({ path: ".env.local" })
+
+// Owner-only route (full data dump): mock an authenticated session.
+vi.mock("@/lib/session", () => ({ getSession: vi.fn() }))
+import { getSession } from "@/lib/session"
 
 let GET: () => Promise<Response>
 let db: typeof import("@/db/client").db
@@ -22,12 +26,22 @@ beforeAll(async () => {
   inArray = (await import("drizzle-orm")).inArray
 })
 
+beforeEach(() => {
+  vi.mocked(getSession).mockResolvedValue({ sub: "owner" })
+})
+
 afterEach(async () => {
   await db.delete(dailyMetric).where(inArray(dailyMetric.date, TEST_DATES))
   await db.delete(workouts).where(inArray(workouts.externalId, TEST_EXTERNAL_IDS))
 })
 
 describe("GET /api/export", () => {
+  it("returns 401 without an owner session", async () => {
+    vi.mocked(getSession).mockResolvedValue(null)
+    const res = await GET()
+    expect(res.status).toBe(401)
+  })
+
   it("returns a zip bundle of workouts.csv and daily_metrics.csv", async () => {
     await db.insert(dailyMetric).values({
       date: "2099-01-01",

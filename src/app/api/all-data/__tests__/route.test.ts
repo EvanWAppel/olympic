@@ -16,6 +16,10 @@ vi.mock("@/db/client", () => ({
   db: { delete: deleteMock },
 }))
 
+// Owner-only route: mock the session so the guard sees an authenticated owner.
+vi.mock("@/lib/session", () => ({ getSession: vi.fn() }))
+
+import { getSession } from "@/lib/session"
 import { DELETE, CONFIRM_PHRASE } from "../route"
 
 function req(headers: Record<string, string> = {}): Request {
@@ -27,6 +31,7 @@ function req(headers: Record<string, string> = {}): Request {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  vi.mocked(getSession).mockResolvedValue({ sub: "owner" })
   // Route deletes workouts first, then daily metrics.
   returningMock
     .mockResolvedValueOnce([{ id: "a" }, { id: "b" }, { id: "c" }])
@@ -34,6 +39,13 @@ beforeEach(() => {
 })
 
 describe("DELETE /api/all-data", () => {
+  it("returns 401 without an owner session and touches nothing", async () => {
+    vi.mocked(getSession).mockResolvedValue(null)
+    const res = await DELETE(req({ "x-confirm-delete": CONFIRM_PHRASE }))
+    expect(res.status).toBe(401)
+    expect(deleteMock).not.toHaveBeenCalled()
+  })
+
   it("rejects without the confirmation header and touches nothing", async () => {
     const res = await DELETE(req())
     expect(res.status).toBe(400)
