@@ -37,6 +37,12 @@ interface Props {
   settings: { weightLb: number; strideIn: number }
   /** IANA timezone for displaying workout timestamps (from settings). */
   timezone: string
+  /**
+   * When true, render edit/delete affordances. Defaults to false so anonymous
+   * (public) viewers get a read-only list — the write endpoints are guarded
+   * server-side regardless, this just hides the controls.
+   */
+  ownerMode?: boolean
 }
 
 function fmtNum(value: string | number | null, digits = 2): string {
@@ -75,7 +81,12 @@ const FILTERS: Array<{ value: SourceFilter; label: string }> = [
   { value: "outdoor", label: "Outdoor" },
 ]
 
-export function WorkoutList({ workouts, settings, timezone }: Props) {
+export function WorkoutList({
+  workouts,
+  settings,
+  timezone,
+  ownerMode = false,
+}: Props) {
   const router = useRouter()
   const [editing, setEditing] = useState<Workout | null>(null)
   const [deleting, setDeleting] = useState<Workout | null>(null)
@@ -177,37 +188,39 @@ export function WorkoutList({ workouts, settings, timezone }: Props) {
                 <p className="text-muted-foreground italic">{w.notes}</p>
               )}
             </div>
-            <div className="flex gap-2 sm:flex-shrink-0">
-              {w.source === "treadmill" && (
+            {ownerMode && (
+              <div className="flex gap-2 sm:flex-shrink-0">
+                {w.source === "treadmill" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setEditing(w)}
+                    aria-label={`Edit workout from ${fmtDateTime(w.startAt, timezone)}`}
+                  >
+                    Edit
+                  </Button>
+                )}
+                {w.source !== "treadmill" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled
+                    aria-label="Edit (outdoor workouts come from Apple Health)"
+                    title="Outdoor workouts come from Apple Health"
+                  >
+                    Edit
+                  </Button>
+                )}
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => setEditing(w)}
-                  aria-label={`Edit workout from ${fmtDateTime(w.startAt, timezone)}`}
+                  onClick={() => setDeleting(w)}
+                  aria-label={`Delete workout from ${fmtDateTime(w.startAt, timezone)}`}
                 >
-                  Edit
+                  Delete
                 </Button>
-              )}
-              {w.source !== "treadmill" && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled
-                  aria-label="Edit (outdoor workouts come from Apple Health)"
-                  title="Outdoor workouts come from Apple Health"
-                >
-                  Edit
-                </Button>
-              )}
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setDeleting(w)}
-                aria-label={`Delete workout from ${fmtDateTime(w.startAt, timezone)}`}
-              >
-                Delete
-              </Button>
-            </div>
+              </div>
+            )}
           </li>
         ))}
       </ul>

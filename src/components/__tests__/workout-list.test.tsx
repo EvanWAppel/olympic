@@ -42,14 +42,34 @@ describe("<WorkoutList>", () => {
     expect(screen.getByText(/no workouts/i)).toBeInTheDocument()
   })
 
-  it("renders a row per workout with edit and delete affordances", () => {
+  it("renders edit and delete affordances in owner mode", () => {
     const workouts = [
       makeWorkout({ id: "a" }),
       makeWorkout({ id: "b", source: "outdoor", speedMph: null, inclinePct: null }),
     ]
-    render(<WorkoutList workouts={workouts} settings={settings} timezone="America/New_York" />)
+    render(
+      <WorkoutList
+        workouts={workouts}
+        settings={settings}
+        timezone="America/New_York"
+        ownerMode
+      />,
+    )
     expect(screen.getAllByRole("button", { name: /edit/i })).toHaveLength(2)
     expect(screen.getAllByRole("button", { name: /delete/i })).toHaveLength(2)
+  })
+
+  it("hides edit and delete affordances for public (anonymous) viewers", () => {
+    const workouts = [
+      makeWorkout({ id: "a" }),
+      makeWorkout({ id: "b", source: "outdoor", speedMph: null, inclinePct: null }),
+    ]
+    // Default (no ownerMode prop) is the public, read-only view.
+    render(<WorkoutList workouts={workouts} settings={settings} timezone="America/New_York" />)
+    expect(screen.queryByRole("button", { name: /edit/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /delete/i })).not.toBeInTheDocument()
+    // The list itself still renders for reading.
+    expect(screen.getAllByRole("listitem")).toHaveLength(2)
   })
 
   it("displays the workout time in the configured timezone, not the browser's", () => {

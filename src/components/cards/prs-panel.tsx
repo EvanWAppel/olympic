@@ -30,7 +30,7 @@ function PrRow({
   const isNew =
     value !== null && setAt !== null && daysBetween(setAt, today) <= 7
   return (
-    <div className="flex items-center justify-between gap-2">
+    <div className="record-row flex items-center justify-between gap-2">
       <span className="text-sm text-muted-foreground">{label}</span>
       <span className="flex items-center gap-2 text-sm font-medium tabular-nums">
         {value ?? "—"}
@@ -42,7 +42,7 @@ function PrRow({
 
 export function PrsPanel({ prs, today }: Props) {
   return (
-    <Card>
+    <Card className="records-card">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           Personal records

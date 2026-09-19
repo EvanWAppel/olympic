@@ -26,7 +26,7 @@ interface Props {
 export function PaceInclineTrend({ data, metric }: Props) {
   const key = metric === "speed" ? "avgSpeedMph" : "avgInclinePct"
   const label = metric === "speed" ? "Avg speed (mph)" : "Avg incline (%)"
-  const color = metric === "speed" ? "hsl(220, 90%, 56%)" : "hsl(30, 90%, 50%)"
+  const color = metric === "speed" ? "#cf4b2c" : "#777d69"
   const events = eventMarkersFor(
     data.map((d) => d.weekStart),
     "week",
@@ -36,10 +36,11 @@ export function PaceInclineTrend({ data, metric }: Props) {
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-          <XAxis dataKey="weekStart" stroke="currentColor" fontSize={11} />
-          <YAxis stroke="currentColor" fontSize={11} domain={["auto", "auto"]} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+          <XAxis dataKey="weekStart" tickFormatter={(value: string) => value.slice(5).replace("-", "/")} stroke="#838579" tickLine={false} axisLine={false} fontSize={11} />
+          <YAxis stroke="#838579" tickLine={false} axisLine={false} fontSize={11} domain={["auto", "auto"]} />
           <Tooltip
+            formatter={(value) => [Number(value ?? 0).toFixed(2), label]}
             contentStyle={{
               background: "var(--background)",
               border: "1px solid var(--border)",

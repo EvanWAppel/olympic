@@ -3,6 +3,7 @@ import {
   handleUpload,
   type HandleUploadBody,
 } from "@vercel/blob/client"
+import { requireOwnerOr401 } from "@/lib/api-guard"
 
 export const runtime = "nodejs"
 
@@ -14,6 +15,9 @@ const MAX_UPLOAD_BYTES = 500 * 1024 * 1024 // 500 MB — Apple exports can be la
  * token minted here. Requires BLOB_READ_WRITE_TOKEN in the environment.
  */
 export async function POST(req: Request): Promise<NextResponse> {
+  const denied = await requireOwnerOr401()
+  if (denied) return denied
+
   const body = (await req.json()) as HandleUploadBody
   try {
     const jsonResponse = await handleUpload({

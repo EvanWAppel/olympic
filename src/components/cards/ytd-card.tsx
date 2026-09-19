@@ -7,7 +7,7 @@ interface Props {
 
 export function YtdCard({ miles, workoutCount }: Props) {
   return (
-    <Card>
+    <Card className="stat-card ytd-card">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           Year to date

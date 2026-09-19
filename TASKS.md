@@ -196,6 +196,85 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 ---
 
+## Phase 5 — Public face & single-user auth (v2)
+
+> Implements [PRD.md](./PRD.md) v2 (§4 Audiences, §6 access map, §7 passkey auth, §8 recruiter surface, §12 going-public checklist). Goal: a public read-only dashboard + `/about` case study that a recruiter can open with no login, while all writes are gated behind a single-user passkey.
+>
+> **Order matters.** Group K is foundational and blocking — it must land before Group N can remove deployment protection (don't lock yourself out). Groups L and M can parallelize once K's session + `requireOwner()` exist. Group N is the final cutover.
+>
+> **Hard rule:** deployment protection stays ON until K is done, a passkey is registered, and L's guards are verified on every owner-only route in a preview deploy.
+
+### Group K: Passkey auth (WebAuthn) — FOUNDATIONAL, do first
+
+> Self-contained. Delivers register → login → session → guard. No public-surface changes yet.
+
+- [x] **K1** Install `@simplewebauthn/server` + `@simplewebauthn/browser`; chose **`jose`**-signed cookie for the session; generated `SESSION_SECRET` + `BOOTSTRAP_REGISTRATION_SECRET` into `.env.local` _(still TODO: add both to Vercel env before any preview/prod deploy — see K9/K16)_
+- [x] **K2** Extend `src/db/schema.ts`: added `webauthn_credential` (id, public_key as base64url text, counter bigint, transports text[], device_label, created_at, last_used_at) and `webauthn_challenge` (challenge pk, type enum, expires_at). Migration `0002_last_silver_samurai.sql` generated + applied; tables verified in DB
+- [x] **K3** Test `src/db/__tests__/credentials.repo.test.ts` — save, fetch-by-id (+null), list, count, update counter/last_used, delete; scoped cleanup via `test-cred-*` ids (7 tests)
+- [x] **K4** Implement `src/db/credentials.repo.ts` (`saveCredential`, `getCredentialById`, `listCredentials`, `countCredentials`, `updateCredentialCounter`, `deleteCredential`)
+- [x] **K5** Test `src/db/__tests__/challenges.repo.test.ts` — single-use consume-on-read, reject expired, type isolation, latest-of-type (4 tests)
+- [x] **K6** Implement `src/db/challenges.repo.ts` (`createChallenge` with TTL, `consumeChallenge(type)` atomic delete-returning; default 5-min TTL)
+- [x] **K7** Test `src/lib/__tests__/session.test.ts` — token mint/verify, reject tampered/expired/garbage, cookie set→getSession, clear→logout, `requireOwner` returns/throws (8 tests; `next/headers` mocked)
+- [x] **K8** Implement `src/lib/session.ts` — `jose` HS256 signed JWT, httpOnly/Secure/SameSite=Lax cookie, **30-day rolling** session, `createSessionToken`/`verifySessionToken`/`setSessionCookie`/`clearSessionCookie`/`getSession`/`requireOwner`/`UnauthorizedError`
+- [x] **K9** Test `src/app/api/auth/register/__tests__/route.test.ts` — options + verify gating (403 no/bad secret, 403 when creds exist w/o session, 200 on zero-creds or session) and verify error paths (400 missing response / expired challenge / failed attestation). 9 tests; DB+session mocked, real `@simplewebauthn`. _(Real attestation happy-path → K16 on device.)_
+- [x] **K10** Implement `src/lib/webauthn.ts` (RP config from Origin, `isRegistrationAllowed` gate) + `register/options/route.ts` (`generateRegistrationOptions`, excludeCredentials) + `register/verify/route.ts` (`verifyRegistrationResponse`, store base64url pubkey, set session on success)
+- [x] **K11** Test `src/app/api/auth/login/__tests__/route.test.ts` — options returns challenge + allowCredentials & stores auth challenge; verify error paths (400 missing/expired, 401 unknown credential, 400 failed assertion). 6 tests; DB+session mocked. _(Real assertion happy-path + counter bump → K16 on device.)_
+- [x] **K12** Implement `login/options/route.ts` (`generateAuthenticationOptions`, allowCredentials) + `login/verify/route.ts` (`verifyAuthenticationResponse` against stored base64url pubkey, `updateCredentialCounter` to catch cloned authenticators, set session)
+- [x] **K13** Test `src/app/api/auth/logout/__tests__/route.test.ts` — calls `clearSessionCookie`, returns `{ ok: true }` (1 test)
+- [x] **K14** Implement `logout/route.ts`
+- [x] **K15** Build `src/app/login/page.tsx` (unadvertised, `robots: noindex`) + `src/components/login-panel.tsx` — passkey login (`startAuthentication`) and a bootstrap-secret-gated register form (`startRegistration`, used by K16), redirect to `/` on success. Test `login-panel.test.tsx` (3 tests, browser lib + fetch mocked). Full suite green (166 tests); prod build compiles all auth routes + `/login`.
+- [~] **K16** Register first passkey (iPhone Face ID) + laptop as 2nd device; verify login round-trips. **In progress.**
+  - [x] Env on Vercel Production+Development: `SESSION_SECRET`, `BOOTSTRAP_REGISTRATION_SECRET`, `RP_ID=olympic.evanappel.me`, `RP_ORIGIN=https://olympic.evanappel.me`
+  - [x] Decided permanent domain: **olympic.evanappel.me** (passkey rpID + resume link); attached to project
+  - [x] Deployed v2 auth code to Production (additive; still behind deployment protection); aliased to olympic.evanappel.me
+  - [ ] **Blocked on DNS:** add `A olympic → 76.76.21.21` at Wix (evanappel.me nameservers = ns6/ns7.wixdns.net); wait for Vercel verification + cert
+  - [ ] **Interim (while DNS propagates):** work against the default Vercel domain **`olympic-lime-six.vercel.app`**. For passkeys to work there, set Vercel env `RP_ID=olympic-lime-six.vercel.app` + `RP_ORIGIN=https://olympic-lime-six.vercel.app` (or **unset** both — `getRpConfig` falls back to the request Origin), then redeploy. Swap back to `olympic.evanappel.me` once the A record verifies.
+  - [ ] On iPhone: open `https://olympic-lime-six.vercel.app/login` → "Register a device" → paste `BOOTSTRAP_REGISTRATION_SECRET` (from `.env.local`) → Face ID
+  - [ ] Confirm login round-trips; register laptop as 2nd device
+  - [ ] After first credential registered: consider rotating/removing `BOOTSTRAP_REGISTRATION_SECRET` (N-phase)
+
+### Group L: Access control & public/private split
+
+> Depends on **K7, K8** (session + `requireOwner`). Applies the guards and the public read scoping.
+
+- [x] **L1** Test `requireOwner()` guard: owner-only routes return 401/redirect without a valid session, 200 with one _(`api-guard.test.ts` unit test + per-route 401 cases on workouts, settings, export, all-data, import, secret)_
+- [x] **L2** Apply `requireOwner()` to `POST/PATCH/DELETE /api/workouts*`, `GET/POST(PATCH) /api/settings`, `POST /api/health/import`, `GET /api/export`, `DELETE /api/all-data`, `/api/health/blob-upload`, and the `/settings` page _(via `requireOwnerOr401()` guard clause in `src/lib/api-guard.ts`; settings page redirects to `/login`)_
+- [x] **L3** Test `GET /api/health/secret` now requires a session (closes the audit-flagged hole: it previously returned the ingest secret unauthenticated)
+- [x] **L4** Gate the standalone secret-read route (GET + POST now behind `requireOwnerOr401()`); the secret is surfaced through the owner-guarded Settings flow
+- [x] **L5** Test public DTOs: `publicSettings()` drops `health_ingest_secret`; `publicWorkout()` exposes only whitelisted fields (`dto.test.ts`)
+- [x] **L6** Implement read DTOs / field whitelists in `src/lib/dto.ts`; `GET /api/workouts` (public) serializes through `publicWorkout`
+- [x] **L7** Test `<WorkoutList>` renders read-only for anonymous (no edit/delete) and shows controls only in owner mode; verified live as anonymous on `/` and `/settings`→`/login`
+- [x] **L8** Implement owner-mode vs public-mode rendering (server-side `getSession()` in layout + page); `/api/health/ingest` bearer path untouched by session logic
+- [x] **L9** Add `src/app/robots.ts` + `metadataBase`: allow `/`, `/about`; disallow `/settings`, `/login`, `/api/`. `/settings` also `robots: noindex`
+
+### Group M: Recruiter surface (header identity + /about)
+
+> Mostly independent; depends on **K15/L7** only for hiding the login entrance and owner-mode affordances. Can parallelize with L.
+
+- [x] **M1** Copy `~/Documents/career/resumes/resume_ai_engineer.pdf` → `public/resume.pdf` _(done)_
+- [x] **M2** Test `<SiteHeader>` renders name + links (GitHub `EvanWAppel/olympic`, LinkedIn `evan-appel-8885569b`, Resume `/resume.pdf`, email `mailto:appelew@gmail.com`, personal site) and an "About this build" link; renders no login button _(`site-header.test.tsx`)_
+- [x] **M3** Implement `src/components/site-header.tsx`; mounted in `app/layout.tsx` with owner-only Settings link. _(Personal-site links the `enki` repo as a placeholder until the live domain is confirmed.)_
+- [x] **M4** Test live-metrics helper `getAboutMetrics()` — total workouts, days of data, current streak, test count (queried, not hardcoded; DI-based `about-metrics.test.ts`)
+- [x] **M5** Implement `getAboutMetrics()` (reuses totals/streak repos; test count captured at build via `scripts/count-tests.mjs` → `test-count.generated.ts`)
+- [x] **M6** Build `src/app/about/page.tsx` — personal narrative, architecture + data-flow diagram, decision log/tradeoffs, stack + live metrics (PRD §8.2)
+- [x] **M7** Author the architecture/data-flow diagram (inline SVG) showing Apple Health → ingest → dedup → dashboard (`src/components/about/architecture-diagram.tsx`)
+- [x] **M8** Visual check the public dashboard + `/about` as anonymous: real data, no empty states, no auth wall, read-only list — verified in browser
+
+### Group N: Going-public cutover (FINAL, sequential)
+
+> Depends on **K, L, M** complete and verified on a preview deploy. This is the §12 checklist — do not skip a box.
+
+- [ ] **N1** Audit git history for secrets (`health_ingest_secret`, `DATABASE_URL`, `SESSION_SECRET`, `BOOTSTRAP_REGISTRATION_SECRET`, any `.env`); scrub with `git filter-repo` if found
+- [ ] **N2** Rotate the `health_ingest_secret` to a fresh value; reconfigure Health Auto Export on the phone; confirm next sync lands
+- [ ] **N3** Replace the default `create-next-app` README with a real one (what/why, agentic-build story, stack, screenshots, live URL, run instructions)
+- [ ] **N4** Add Vercel Firewall / WAF rate limits on `/api/health/ingest`, `/api/auth/login/*`, `/api/auth/register/*`
+- [ ] **N5** Verify on the preview deploy that NO private surface (Settings, ingest secret, write endpoints) is reachable by an anonymous request
+- [ ] **N6** Remove Vercel deployment protection (Settings → Deployment Protection → off) — only after N5 passes and a passkey login is confirmed working in prod
+- [ ] **N7** Smoke-test prod as anonymous (dashboard + `/about` load, links work, resume downloads) and as owner (login → log a workout → it appears)
+- [ ] **N8** Tag commit `v2.0-public`
+
+---
+
 ## Notes for parallel agents
 
 - **Branch per group**: `feat/group-a-calc`, `feat/group-c-health-import`, etc.

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { getMood, upsertMood } from "@/db/mood.repo"
 import { getSettings } from "@/db/settings.repo"
+import { requireOwnerOr401 } from "@/lib/api-guard"
 import { localDateKey } from "@/lib/dates"
 
 const InputSchema = z.object({
@@ -9,7 +10,12 @@ const InputSchema = z.object({
   comment: z.string().max(2000).optional(),
 })
 
+// Owner-only write (PRD §3: no public write of any kind). Mood is also
+// sensitive mental-health data, so it must never be settable by the public.
 export async function POST(req: Request) {
+  const denied = await requireOwnerOr401()
+  if (denied) return denied
+
   const json = await req.json().catch(() => null)
   const parsed = InputSchema.safeParse(json)
   if (!parsed.success) {
@@ -28,7 +34,11 @@ export async function POST(req: Request) {
   return NextResponse.json(row, { status: 201 })
 }
 
+// Owner-only read: mental-health data is never exposed to the public surface.
 export async function GET() {
+  const denied = await requireOwnerOr401()
+  if (denied) return denied
+
   const { timezone } = await getSettings()
   const date = localDateKey(new Date(), timezone)
   const row = await getMood(date)

@@ -3,6 +3,7 @@ import AdmZip from "adm-zip"
 import { parseHealthExport } from "@/lib/health-import/parse"
 import { importHealthData } from "@/lib/health-import/import"
 import { getSettings } from "@/db/settings.repo"
+import { requireOwnerOr401 } from "@/lib/api-guard"
 
 export const runtime = "nodejs"
 export const maxDuration = 300 // seconds
@@ -56,6 +57,9 @@ async function importFromZipBuffer(
 }
 
 export async function POST(req: Request) {
+  const denied = await requireOwnerOr401()
+  if (denied) return denied
+
   const contentType = req.headers.get("content-type") ?? ""
 
   // Blob path: JSON body with { blobUrl } — file already uploaded to Vercel Blob.

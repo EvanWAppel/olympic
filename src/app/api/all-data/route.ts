@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { db } from "@/db/client"
 import { dailyMetric, workouts } from "@/db/schema"
+import { requireOwnerOr401 } from "@/lib/api-guard"
 
 export const runtime = "nodejs"
 
@@ -12,6 +13,9 @@ export const CONFIRM_PHRASE = "DELETE ALL DATA"
  * Requires `x-confirm-delete: DELETE ALL DATA` to guard against accidental calls.
  */
 export async function DELETE(req: Request) {
+  const denied = await requireOwnerOr401()
+  if (denied) return denied
+
   if (req.headers.get("x-confirm-delete") !== CONFIRM_PHRASE) {
     return NextResponse.json(
       {

@@ -7,6 +7,7 @@ import {
   type WorkoutUpdate,
 } from "@/db/workouts.repo"
 import { getSettings } from "@/db/settings.repo"
+import { requireOwnerOr401 } from "@/lib/api-guard"
 import { daysBetween, localDateKey } from "@/lib/dates"
 
 const PatchSchema = z.object({
@@ -24,6 +25,9 @@ export async function PATCH(
   req: Request,
   ctx: { params: Promise<{ id: string }> },
 ) {
+  const denied = await requireOwnerOr401()
+  if (denied) return denied
+
   const { id } = await ctx.params
   const json = await req.json().catch(() => null)
   const parsed = PatchSchema.safeParse(json)
@@ -71,6 +75,9 @@ export async function DELETE(
   _req: Request,
   ctx: { params: Promise<{ id: string }> },
 ) {
+  const denied = await requireOwnerOr401()
+  if (denied) return denied
+
   const { id } = await ctx.params
   const ok = await deleteWorkout(id)
   if (!ok) return NextResponse.json({ error: "not_found" }, { status: 404 })

@@ -1,8 +1,12 @@
 // @vitest-environment node
-import { afterAll, beforeAll, describe, expect, it } from "vitest"
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 import { config } from "dotenv"
 
 config({ path: ".env.local" })
+
+// POST is owner-only: mock the session so the guard sees an authenticated owner.
+vi.mock("@/lib/session", () => ({ getSession: vi.fn() }))
+import { getSession } from "@/lib/session"
 
 type Handler = (req?: Request) => Promise<Response>
 let POST: Handler
@@ -41,7 +45,16 @@ function postReq(body: unknown) {
   })
 }
 
+beforeEach(() => {
+  vi.mocked(getSession).mockResolvedValue({ sub: "owner" })
+})
+
 describe("POST /api/mood", () => {
+  it("returns 401 without an owner session", async () => {
+    vi.mocked(getSession).mockResolvedValue(null)
+    expect((await POST(postReq({ score: 6 }))).status).toBe(401)
+  })
+
   it("stores today's mood and returns it", async () => {
     const res = await POST(postReq({ score: 6, comment: "ok day" }))
     expect(res.status).toBe(201)
@@ -75,5 +88,10 @@ describe("POST /api/mood", () => {
     const body = await res.json()
     expect(body.date).toBe(today)
     expect(body.score).toBe(4)
+  })
+
+  it("GET returns 401 without an owner session", async () => {
+    vi.mocked(getSession).mockResolvedValue(null)
+    expect((await GET()).status).toBe(401)
   })
 })

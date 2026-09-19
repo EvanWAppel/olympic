@@ -1,7 +1,8 @@
-import Link from "next/link"
+import { DashboardIntro } from "@/components/dashboard-intro"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { listWorkouts } from "@/db/workouts.repo"
 import { getSettings } from "@/db/settings.repo"
+import { getSession } from "@/lib/session"
 import { getDailyTotalsRange } from "@/db/totals.repo"
 import { getMood } from "@/db/mood.repo"
 import { addDays, localDateKey } from "@/lib/dates"
@@ -25,7 +26,8 @@ import { SectionErrorBoundary } from "@/components/section-error-boundary"
 export const dynamic = "force-dynamic"
 
 export default async function Home() {
-  const s = await getSettings()
+  const [s, session] = await Promise.all([getSettings(), getSession()])
+  const ownerMode = session !== null
   const timezone = s.timezone
   const today = localDateKey(new Date(), timezone)
   const yearStart = `${today.slice(0, 4)}-01-01`
@@ -34,7 +36,7 @@ export default async function Home() {
   const [totals, workouts, mood] = await Promise.all([
     getDailyTotalsRange({ startDate: rangeStart, endDate: today, timezone }),
     listWorkouts(),
-    getMood(today),
+    ownerMode ? getMood(today) : Promise.resolve(null),
   ])
 
   const moodInitial = mood
@@ -103,19 +105,11 @@ export default async function Home() {
   }))
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8 sm:py-12 flex flex-col gap-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Olympic</h1>
-          <p className="text-sm text-muted-foreground">Treadmill log</p>
-        </div>
-        <Link href="/settings" className="text-sm underline-offset-4 hover:underline">
-          Settings →
-        </Link>
-      </header>
+    <main className="dashboard-shell">
+      <DashboardIntro today={today} />
 
       <SectionErrorBoundary name="Summary cards">
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="summary-grid">
           <TodayCard
             steps={todayTotals?.totalSteps ?? 0}
             distanceMi={todayTotals?.totalDistanceMi ?? 0}
@@ -128,32 +122,38 @@ export default async function Home() {
         </div>
       </SectionErrorBoundary>
 
-      <SectionErrorBoundary name="Log a workout">
-        <Card>
-          <CardHeader>
-            <CardTitle>Log a workout</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <EntryFormIsland settings={settings} today={today} />
-          </CardContent>
-        </Card>
-      </SectionErrorBoundary>
+      {ownerMode && (
+        <SectionErrorBoundary name="Log a workout">
+          <Card>
+            <CardHeader>
+              <CardTitle>Log a workout</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <EntryFormIsland settings={settings} today={today} />
+            </CardContent>
+          </Card>
+        </SectionErrorBoundary>
+      )}
 
-      <SectionErrorBoundary name="Mood check-in">
-        <Card>
-          <CardHeader>
-            <CardTitle>How are you feeling today?</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <MoodCardIsland initial={moodInitial} />
-          </CardContent>
-        </Card>
-      </SectionErrorBoundary>
+      {/* Mood is sensitive mental-health data and an owner-only write — keep the
+          check-in out of the public view. */}
+      {ownerMode && (
+        <SectionErrorBoundary name="Mood check-in">
+          <Card>
+            <CardHeader>
+              <CardTitle>How are you feeling today?</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <MoodCardIsland initial={moodInitial} />
+            </CardContent>
+          </Card>
+        </SectionErrorBoundary>
+      )}
 
       <SectionErrorBoundary name="Daily steps">
         <Card>
           <CardHeader>
-            <CardTitle>Daily steps · last 30 days</CardTitle>
+            <div className="chart-heading"><div><p className="eyebrow">THE EVERYDAY EFFORT</p><CardTitle>Every step counts.</CardTitle></div><span className="period-label">LAST 30 DAYS</span></div>
           </CardHeader>
           <CardContent>
             <DailyStepsBar data={last30} goal={stepGoal} />
@@ -180,7 +180,7 @@ export default async function Home() {
       <SectionErrorBoundary name="Past year">
         <Card>
           <CardHeader>
-            <CardTitle>Past year</CardTitle>
+            <div className="chart-heading" id="consistency"><div><p className="eyebrow">02 / THE LONG GAME</p><CardTitle>A year of showing up.</CardTitle></div><span className="period-label">365 DAYS</span></div>
           </CardHeader>
           <CardContent>
             <YearHeatmap data={heatmap} maxScale={stepGoal} />
@@ -214,13 +214,19 @@ export default async function Home() {
       <SectionErrorBoundary name="Recent workouts">
         <Card>
           <CardHeader>
-            <CardTitle>Recent workouts</CardTitle>
+            <div className="chart-heading" id="workouts"><div><p className="eyebrow">03 / THE WORK LOG</p><CardTitle>Recent workouts</CardTitle></div></div>
           </CardHeader>
           <CardContent>
-            <WorkoutList workouts={serialized} settings={settings} timezone={timezone} />
+            <WorkoutList
+              workouts={serialized}
+              settings={settings}
+              timezone={timezone}
+              ownerMode={ownerMode}
+            />
           </CardContent>
         </Card>
       </SectionErrorBoundary>
+      <footer className="dashboard-footer"><span>OLYMPIC / A PERSONAL MOVEMENT JOURNAL</span><span>Progress is a practice. Keep going. ↗</span></footer>
     </main>
   )
 }

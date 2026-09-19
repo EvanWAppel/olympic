@@ -1,8 +1,12 @@
 // @vitest-environment node
-import { afterEach, beforeAll, describe, expect, it } from "vitest"
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 import { config } from "dotenv"
 
 config({ path: ".env.local" })
+
+// Owner-only route: mock the session so the guard sees an authenticated owner.
+vi.mock("@/lib/session", () => ({ getSession: vi.fn() }))
+import { getSession } from "@/lib/session"
 
 type POST = (req: Request) => Promise<Response>
 let POST: POST
@@ -23,6 +27,10 @@ beforeAll(async () => {
   inArray = orm.inArray
 })
 
+beforeEach(() => {
+  vi.mocked(getSession).mockResolvedValue({ sub: "owner" })
+})
+
 afterEach(async () => {
   if (createdIds.length > 0) {
     await db.delete(workouts).where(inArray(workouts.id, createdIds))
@@ -41,6 +49,17 @@ const validBody = {
 }
 
 describe("POST /api/workouts", () => {
+  it("returns 401 without an owner session", async () => {
+    vi.mocked(getSession).mockResolvedValue(null)
+    const req = new Request("http://localhost/api/workouts", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(validBody),
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(401)
+  })
+
   it("persists the full row and returns it", async () => {
     const req = new Request("http://localhost/api/workouts", {
       method: "POST",
