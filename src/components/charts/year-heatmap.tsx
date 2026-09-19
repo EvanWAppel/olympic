@@ -35,15 +35,16 @@ export function YearHeatmap({ data, maxScale = 12_000 }: Props) {
     <div className="overflow-x-auto">
       <ActivityCalendar
         data={transformed}
-        blockSize={11}
+        blockSize={13}
         blockMargin={3}
         fontSize={11}
+        colorScheme="light"
         labels={{
           legend: { less: "Quiet", more: "Active" },
-          totalCount: "{{count}} steps in {{year}}",
+          totalCount: "{{count}} steps over the past year",
         }}
         theme={{
-          light: ["#ebedf0", "#c6e48b", "#7bc96f", "#239a3b", "#196127"],
+          light: ["#e9e8df", "#e4c9ad", "#d99e77", "#d16e47", "#b94026"],
           dark: ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"],
         }}
       />

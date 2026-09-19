@@ -34,9 +34,9 @@ export function DailyStepsBar({ data, goal }: Props) {
     <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-          <XAxis dataKey="date" stroke="currentColor" fontSize={11} interval="preserveStartEnd" />
-          <YAxis stroke="currentColor" fontSize={11} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+          <XAxis dataKey="date" tickFormatter={(value: string) => value.slice(5).replace("-", "/")} stroke="#838579" tickLine={false} axisLine={false} fontSize={11} interval="preserveStartEnd" />
+          <YAxis stroke="#838579" tickLine={false} axisLine={false} fontSize={11} />
           <Tooltip
             contentStyle={{
               background: "var(--background)",
@@ -47,15 +47,15 @@ export function DailyStepsBar({ data, goal }: Props) {
             formatter={(value, name) => [Number(value ?? 0).toLocaleString(), name]}
           />
           <Legend wrapperStyle={{ fontSize: "0.75rem" }} />
-          <Bar dataKey="treadmillSteps" name="Treadmill" stackId="a" fill="hsl(220, 90%, 56%)" />
-          <Bar dataKey="outdoorSteps" name="Outdoor" stackId="a" fill="hsl(140, 65%, 50%)" />
+          <Bar dataKey="treadmillSteps" name="Treadmill" stackId="a" fill="#cf4b2c" />
+          <Bar dataKey="outdoorSteps" name="Outdoor" stackId="a" fill="#b9c2a6" />
           {eventReferenceLines(events)}
           {goal && (
             <ReferenceLine
               y={goal}
-              stroke="hsl(0, 70%, 55%)"
+              stroke="#777d69"
               strokeDasharray="4 4"
-              label={{ value: `Goal ${goal.toLocaleString()}`, fontSize: 10, fill: "hsl(0, 70%, 55%)" }}
+              label={{ value: `Goal ${goal.toLocaleString()}`, fontSize: 10, fill: "#777d69" }}
             />
           )}
         </BarChart>

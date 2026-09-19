@@ -8,7 +8,7 @@ interface Props {
 export function WeekCard({ miles, goalMiles }: Props) {
   const pct = goalMiles > 0 ? Math.min(100, (miles / goalMiles) * 100) : 0
   return (
-    <Card>
+    <Card className="stat-card week-card">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           This week

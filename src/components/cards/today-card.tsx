@@ -11,7 +11,7 @@ export function TodayCard({ steps, distanceMi, calories, goal }: Props) {
   const pct = goal > 0 ? (steps / goal) * 100 : 0
   const barPct = Math.min(100, pct)
   return (
-    <Card>
+    <Card className="stat-card today-card">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           Today
