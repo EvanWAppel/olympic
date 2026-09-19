@@ -36,9 +36,9 @@ export function WeeklyMilesLine({ weeks, rollingWindow = 4 }: Props) {
     <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={merged} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-          <XAxis dataKey="x" stroke="currentColor" fontSize={11} />
-          <YAxis stroke="currentColor" fontSize={11} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+          <XAxis dataKey="x" tickFormatter={(value: string) => value.slice(5).replace("-", "/")} stroke="#838579" tickLine={false} axisLine={false} fontSize={11} />
+          <YAxis stroke="#838579" tickLine={false} axisLine={false} fontSize={11} />
           <Tooltip
             contentStyle={{
               background: "var(--background)",
@@ -51,7 +51,7 @@ export function WeeklyMilesLine({ weeks, rollingWindow = 4 }: Props) {
             type="monotone"
             dataKey="miles"
             name="Weekly miles"
-            stroke="hsl(220, 90%, 56%)"
+            stroke="#cf4b2c"
             strokeWidth={2}
             dot={{ r: 2 }}
           />
@@ -59,7 +59,7 @@ export function WeeklyMilesLine({ weeks, rollingWindow = 4 }: Props) {
             type="monotone"
             dataKey="avg"
             name={`${rollingWindow}-wk avg`}
-            stroke="hsl(0, 70%, 55%)"
+            stroke="#777d69"
             strokeWidth={1.5}
             strokeDasharray="4 4"
             dot={false}

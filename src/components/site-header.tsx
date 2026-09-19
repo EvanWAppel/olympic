@@ -19,20 +19,16 @@ const LINKS = [
 
 export function SiteHeader({ ownerMode = false }: { ownerMode?: boolean }) {
   return (
-    <header className="border-b border-border">
-      <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <Link href="/" className="text-lg font-semibold tracking-tight">
-            Evan Appel
-          </Link>
-          <p className="text-sm text-muted-foreground">
-            Full-stack engineer — a tool I built and use daily.
-          </p>
+    <header className="site-header">
+      <div className="site-header-inner">
+        <div className="brand-group">
+          <Link href="/" className="brand" aria-label="Olympic home"><span className="brand-mark" aria-hidden="true">↗</span>olympic<span className="brand-dot">®</span></Link>
+          <div className="creator"><span>BUILT & WALKED BY</span><span>Evan Appel</span></div>
         </div>
 
         <nav
           aria-label="Profile links"
-          className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm"
+          className="profile-nav"
         >
           {LINKS.map(({ label, href }) => {
             const external = href.startsWith("http")

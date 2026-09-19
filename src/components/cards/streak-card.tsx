@@ -6,7 +6,7 @@ interface Props {
 
 export function StreakCard({ days }: Props) {
   return (
-    <Card>
+    <Card className="stat-card streak-card">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           Streak
