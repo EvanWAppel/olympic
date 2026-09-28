@@ -266,12 +266,61 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 - [ ] **N1** Audit git history for secrets (`health_ingest_secret`, `DATABASE_URL`, `SESSION_SECRET`, `BOOTSTRAP_REGISTRATION_SECRET`, any `.env`); scrub with `git filter-repo` if found
 - [ ] **N2** Rotate the `health_ingest_secret` to a fresh value; reconfigure Health Auto Export on the phone; confirm next sync lands
-- [ ] **N3** Replace the default `create-next-app` README with a real one (what/why, agentic-build story, stack, screenshots, live URL, run instructions)
+- [x] **N3** Replace the default `create-next-app` README with a real one (what/why, agentic-build story, stack, live URL, run instructions) — done in **O1** (screenshot still TODO)
 - [ ] **N4** Add Vercel Firewall / WAF rate limits on `/api/health/ingest`, `/api/auth/login/*`, `/api/auth/register/*`
 - [ ] **N5** Verify on the preview deploy that NO private surface (Settings, ingest secret, write endpoints) is reachable by an anonymous request
 - [ ] **N6** Remove Vercel deployment protection (Settings → Deployment Protection → off) — only after N5 passes and a passkey login is confirmed working in prod
 - [ ] **N7** Smoke-test prod as anonymous (dashboard + `/about` load, links work, resume downloads) and as owner (login → log a workout → it appears)
 - [ ] **N8** Tag commit `v2.0-public`
+
+---
+
+## Phase 6 — Portfolio signal features (v3)
+
+> Raises the engineering signal a recruiter/screener can verify fast (PRD §15). Groups are largely independent; **Group O ships first**. Group T (AI insights) is **BLOCKED** on the personal-API-key guardrail — see `BLOCKED.md`; do not start it until the four-point checklist is cleared.
+
+### Group O: README + CI — DO FIRST (guardrail-clear: no deploy, no secrets)
+
+- [x] **O1** Replace the default `create-next-app` README with a real one: what/why, live URL, stack, agentic-build story, run + test instructions, CI + test-count badges. _(Screenshot/GIF still TODO — needs the app run + a capture; noted as an HTML comment in README. Pulls forward N3.)_
+- [x] **O2** Add `.github/workflows/ci.yml`: on push + PR, `pnpm install` → `typecheck` → `lint` → `test:run`. Node 24, pnpm 11, dep cache. DB-integration tests run against an ephemeral Postgres + Neon HTTP proxy (`docker-compose.test.yml`) — no remote branch, no secrets.
+- [x] **O3** Scripts confirmed present (`typecheck`, `lint`, non-watch `test:run`); no changes needed.
+- [x] **O4** Added CI status + tests/stack badges to the README.
+- [~] **O5** Verified locally: typecheck ✓, lint ✓ (0 errors), full suite **215/215 ✓** against the local proxy stack. **Remaining:** push the branch + open a PR (awaiting owner OK — outward action) and confirm the Actions run is green on the PR.
+
+### Group P: Lighthouse Performance 63 → 90+
+
+- [ ] **P1** Baseline: run Lighthouse (mobile) on prod, record current Performance breakdown (LCP/TBT/CLS) and top opportunities.
+- [ ] **P2** Address the top offenders — likely defer/lazy offscreen charts (Recharts is heavy), trim client JS, review font/image loading, check hydration cost of islands.
+- [ ] **P3** Re-run Lighthouse; target Performance ≥ 90 with a11y/best-practices/SEO still 100. Update the `/about` live-metrics number.
+
+### Group Q: Dynamic OG images + "Year in Movement" recap
+
+- [ ] **Q1** Add `@vercel/og` route rendering a live-data social card (aggregate stats only — no raw records, no secret).
+- [ ] **Q2** Wire OG meta tags on `/` and `/about` to the generated image.
+- [ ] **Q3** Build a `/recap` (or `/year`) page summarizing the year in movement; public, read-only, aggregate.
+- [ ] **Q4** Verify the card renders when the URL is unfurled (curl the OG route + inspect meta; browser check only if unavoidable and approved).
+
+### Group R: Goal-setting + projections
+
+- [ ] **R1** Schema/setting for a yearly mile goal (owner-write); test the repo/setting.
+- [ ] **R2** Projection calc: pace-to-goal + projected year-end total, reusing `world-events.ts` comparisons. Test `src/lib/` calc (TDD-first).
+- [ ] **R3** Dashboard card: owner sets goal; public sees projection read-only. Test component owner vs public modes.
+
+### Group S: Production-maturity touches
+
+- [ ] **S1** Add Vercel Analytics (Vercel-native — no personal third-party key needed).
+- [ ] **S2** Error tracking (e.g. Sentry) with source maps. ⚠️ If it uses a key billed to Evan personally, it must clear the §15.4 personal-key guardrail first — record in `BLOCKED.md` if so.
+- [ ] **S3** Public `/changelog` listing shipped milestones (v1.0, v2.0-public, v3 features).
+
+### Group T: AI-powered movement insights — 🔴 BLOCKED (do not start)
+
+> Blocked on the personal-API-key guardrail (`BLOCKED.md`). All four must be confirmed before any code: isolated AI Gateway workspace, scoped key, hard spend cap + alert, explicit owner confirmation it's not the personal key. Rate limiting + aggregate-only allowlist are also required before public exposure.
+
+- [ ] **T0** 🔴 Clear the four-point key checklist in `BLOCKED.md` (owner action) — gate for everything below.
+- [ ] **T1** Define the strict server-side allowlist of aggregates that may leave the server (weekly miles, trends, streaks — never raw workouts or the ingest secret). Test it.
+- [ ] **T2** Insights endpoint via Vercel AI Gateway (scoped key): "what changed this month" summary over aggregates. Rate-limited (ties to N4). TDD the aggregate-builder + prompt-input shaping.
+- [ ] **T3** (Optional) "Ask my data" natural-language query → structured output → typed filter over public DTOs.
+- [ ] **T4** Showcase the AI feature on `/about`; note the isolation/cap/allowlist decisions as part of the case study.
 
 ---
 

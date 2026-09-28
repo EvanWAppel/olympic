@@ -1,32 +1,77 @@
-name: ci
+name: CI
 
 on:
   push:
+    branches: ["**"]
   pull_request:
 
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
+  check:
+    name: typecheck · lint · test
     runs-on: ubuntu-latest
-    # Integration tests run against a Neon branch. When a DATABASE_URL secret is
-    # configured, the test step runs; otherwise it is skipped (not failed), so
-    # lint + typecheck still gate every push.
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # DB-integration tests talk to a local Neon HTTP proxy in front of a
+      # throwaway Postgres (see docker-compose.test.yml). No remote Neon branch,
+      # no secrets. NEON_LOCAL_PROXY_URL is what routes the HTTP driver locally
+      # (vitest.setup.ts); it never affects a real Neon host.
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/main
+      NEON_LOCAL_PROXY_URL: http://localhost:4444/sql
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 11
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
-      - name: Install
+
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Lint
-        run: pnpm run lint
+
+      - name: Start Postgres + Neon proxy
+        run: docker compose -f docker-compose.test.yml up -d --wait
+
+      - name: Wait for Neon proxy
+        run: |
+          for i in $(seq 1 30); do
+            if (echo > /dev/tcp/localhost/4444) >/dev/null 2>&1; then
+              echo "proxy up"; exit 0
+            fi
+            sleep 1
+          done
+          echo "Neon proxy did not become reachable" >&2
+          docker compose -f docker-compose.test.yml logs neon-proxy >&2 || true
+          exit 1
+
+      - name: Apply database schema
+        run: |
+          compose="docker compose -f docker-compose.test.yml exec -T postgres psql -U postgres -d main -v ON_ERROR_STOP=1"
+          $compose -c 'CREATE EXTENSION IF NOT EXISTS pgcrypto'
+          for f in drizzle/*.sql; do
+            echo "Applying $f"
+            $compose < "$f"
+          done
+
       - name: Typecheck
-        run: pnpm run typecheck
-      - name: Test (integration — needs Neon DATABASE_URL secret)
-        if: ${{ env.DATABASE_URL != '' }}
-        run: pnpm run test:run
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test:run
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.test.yml down -v
