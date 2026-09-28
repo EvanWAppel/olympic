@@ -285,7 +285,7 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 - [x] **O2** Add `.github/workflows/ci.yml`: on push + PR, `pnpm install` → `typecheck` → `lint` → `test:run`. Node 24, pnpm 11, dep cache. DB-integration tests run against an ephemeral Postgres + Neon HTTP proxy (`docker-compose.test.yml`) — no remote branch, no secrets.
 - [x] **O3** Scripts confirmed present (`typecheck`, `lint`, non-watch `test:run`); no changes needed.
 - [x] **O4** Added CI status + tests/stack badges to the README.
-- [~] **O5** Verified locally: typecheck ✓, lint ✓ (0 errors), full suite **215/215 ✓** against the local proxy stack. **Remaining:** push the branch + open a PR (awaiting owner OK — outward action) and confirm the Actions run is green on the PR.
+- [x] **O5** Verified: typecheck ✓, lint ✓ (0 errors), full suite **215/215 ✓** locally against the proxy stack. Opened PR **#20**; GitHub Actions CI **green** on the PR (needed a follow-up commit to supply dummy `BOOTSTRAP_REGISTRATION_SECRET`/`SESSION_SECRET` the auth tests read from `.env.local`).
 
 ### Group P: Lighthouse Performance 63 → 90+
 
