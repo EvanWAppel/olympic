@@ -21,6 +21,13 @@ jobs:
       # (vitest.setup.ts); it never affects a real Neon host.
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/main
       NEON_LOCAL_PROXY_URL: http://localhost:4444/sql
+      # Dummy test-only values (NOT real secrets). Several route tests read these
+      # from .env.local, which doesn't exist in CI. dotenv's config() won't
+      # override an already-set process var, so these are authoritative here.
+      # RP_ID / RP_ORIGIN are intentionally left unset so WebAuthn falls back to
+      # the request Origin (localhost), which the auth tests assert.
+      BOOTSTRAP_REGISTRATION_SECRET: ci-bootstrap-secret-not-real
+      SESSION_SECRET: ci-session-secret-not-real-0123456789abcdef
     steps:
       - name: Checkout
         uses: actions/checkout@v4
