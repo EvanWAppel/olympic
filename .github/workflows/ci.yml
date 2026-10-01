@@ -11,8 +11,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
-    name: typecheck · lint · test
+  # Job name is "build" to satisfy the repo ruleset's required status check
+  # of the same name (protect-default-branch). It runs typecheck + lint + test.
+  build:
+    name: build
     runs-on: ubuntu-latest
     env:
       # DB-integration tests talk to a local Neon HTTP proxy in front of a
