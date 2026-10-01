@@ -21,11 +21,28 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 })
 
+const SITE_DESCRIPTION =
+  "A long-term movement journal — treadmill logs and Apple Health reconciled into one dashboard."
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Olympic",
-  description: "Personal treadmill + walking tracker",
+  description: SITE_DESCRIPTION,
   manifest: "/manifest.json",
+  // og:image / twitter:image are supplied automatically by
+  // src/app/opengraph-image.tsx (the Next file convention).
+  openGraph: {
+    title: "Olympic — a long-term movement journal",
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: "Olympic",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Olympic — a long-term movement journal",
+    description: SITE_DESCRIPTION,
+  },
   icons: {
     icon: "/icons/icon-192.png",
     apple: "/apple-touch-icon.png",
