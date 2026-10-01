@@ -295,10 +295,10 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 ### Group Q: Dynamic OG images + "Year in Movement" recap
 
-- [ ] **Q1** Add `@vercel/og` route rendering a live-data social card (aggregate stats only — no raw records, no secret).
-- [ ] **Q2** Wire OG meta tags on `/` and `/about` to the generated image.
-- [ ] **Q3** Build a `/recap` (or `/year`) page summarizing the year in movement; public, read-only, aggregate.
-- [ ] **Q4** Verify the card renders when the URL is unfurled (curl the OG route + inspect meta; browser check only if unavoidable and approved).
+- [x] **Q1** OG route `src/app/opengraph-image.tsx` (`next/og` `ImageResponse`) renders a live-data card from `getSocialStats()` — aggregate only (YTD miles, marathon-equiv, streak, workouts, days tracked), editorial palette, catch→numberless fallback. New `src/lib/social-stats.ts` (DI, 6 TDD tests).
+- [x] **Q2** OG + Twitter (`summary_large_image`) metadata wired in `app/layout.tsx`; the file convention supplies og:image/twitter:image for `/` and nested routes (incl. `/about`).
+- [ ] **Q3** Build a `/recap` (or `/year`) page summarizing the year in movement; public, read-only, aggregate. _(Next PR — reuses `getSocialStats`.)_
+- [x] **Q4** Verified via curl: OG route → `200 image/png`, 1200×630; homepage HTML carries all og/twitter tags; rendered PNG visually confirmed. Added a guarded `NEON_LOCAL_PROXY_URL` hook to `db/client.ts` so the app runs against the local proxy stack for this verification.
 
 ### Group R: Goal-setting + projections
 

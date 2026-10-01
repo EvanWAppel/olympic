@@ -13,3 +13,13 @@ Append-only log of decisions with a real trade-off (chose X, rejected Y, why). N
 - **Build first: README + CI (Group O).** Chosen over the flashier AI/OG work because it's the highest signal-per-effort (the repo landing page is the first thing a recruiter sees, and the default `create-next-app` README is an active negative signal) and is fully guardrail-clear (no deploy, no external key). Rejected "build the AI centerpiece first" because it's blocked (below) and can't start.
 - **AI insights parked in `BLOCKED.md`, not built now.** The app is public and unauthenticated, so wiring any LLM key triggers the owner's personal-API-key guardrail. Chose to record the four-point checklist (isolated Gateway workspace, scoped key, hard spend cap, explicit confirmation) as a blocker and proceed with the other features. Rejected "just use the personal key for a demo" — that's exactly the guardrail's forbidden case (Tiresias/Elvis incident).
 - **Created `BLOCKED.md` + `DECISIONS.md`.** These standard artifacts were missing from the project; created to self-heal to the ROCRLL/global standard.
+
+## 2026-09-30 — OG images (Group Q)
+
+**Context.** Dynamic social card so pasting the site into LinkedIn/Slack unfurls live stats.
+
+**Decisions.**
+- **`next/og` `ImageResponse`** over a separate `@vercel/og` dependency — it's built into Next 16, one less dep. The route is `force-dynamic` so it reflects live data and doesn't run at build (no DB there).
+- **New `src/lib/social-stats.ts`** rather than extending `about-metrics.ts` — about-metrics is purpose-shaped for the `/about` page and lacks miles; a focused, separately-tested aggregate keeps both clean. Same injectable-deps pattern for testability. Will be reused by the `/recap` page (Q3).
+- **Added an env-gated `NEON_LOCAL_PROXY_URL` hook to `src/db/client.ts`** (not just the test setup). Trade-off: a tiny extra branch in the runtime client, in exchange for being able to run the real app against the local Postgres+proxy stack (so OG rendering could be verified by curl without a remote DB or browser). Guarded by the env var, so production is never affected.
+- **Aggregate-only on the card.** No raw records — YTD miles, marathon-equivalent, streak, workout count, days tracked. Keeps the public surface safe and the figures shareable.
