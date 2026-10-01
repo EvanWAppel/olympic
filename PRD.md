@@ -389,3 +389,57 @@ Flipping from "private behind deployment protection" to "publicly deployed" and 
 - From the header they can reach my GitHub, LinkedIn, resume, and the `/about` case study within one click each.
 - `/about` communicates the architecture, key decisions, and live metrics clearly enough that an engineer can judge the work without reading the code — and the public repo is there if they want to.
 - No private surface (Settings, ingest secret, write endpoints) is reachable or discoverable by a public visitor.
+
+---
+
+## 15. Phase 6 — Portfolio signal features (v3)
+
+> **Purpose.** v2 made Olympic a credible public portfolio piece. v3 raises the *engineering signal a recruiter or technical screener can verify in two minutes* — the repo landing page, provable test discipline, a measurable performance number, and features that showcase product sense and (once unblocked) AI-engineering ability. Ordered by signal-per-effort. Feature 4 (AI insights) is **hard-blocked** pending the personal-API-key guardrail — see §15.4 and `BLOCKED.md`.
+
+### 15.1 Real README (supersedes/pulls forward N3) — *build first*
+
+The repo currently ships the default `create-next-app` README, which is an active negative signal on the GitHub landing page. Replace it with: one-paragraph what/why, a screenshot or GIF of the live dashboard, the live URL, the stack, the "how it was built" agentic-build story, run instructions, and CI/test badges. This pulls N3 out of the going-public cutover so the repo reads well immediately.
+
+### 15.2 Visible CI + test/coverage badges — *build first*
+
+A GitHub Actions workflow running `typecheck + lint + vitest` on every push and PR, with green badges surfaced in the README. Turns "I wrote ~166 tests" into a *provable* claim visible from the repo landing page. No deploy, no secrets.
+
+- **Success:** every push/PR to the repo runs the checks; a red badge appears when they fail; the README shows the current status. Branch protection (owner's global guardrail) can later require the check.
+
+### 15.3 Lighthouse Performance 63 → 90+
+
+Prod Lighthouse is a11y/best-practices/SEO 100 but **Performance 63** — the one number a screener may re-run and hold against the work. Chase 90+ via chart/hydration/bundle work (defer offscreen charts, trim client JS, image/font loading). 
+
+- **Success:** prod mobile Lighthouse Performance ≥ 90, other categories still 100; the number is recorded in `/about` live metrics.
+
+### 15.4 AI-powered movement insights — **BLOCKED (guardrail)**
+
+A feature that sends **aggregated, non-PII stats** (weekly miles, trends, streaks — never raw personal records) to an LLM via the Vercel AI Gateway and returns a natural-language "what changed this month" summary, and/or a natural-language "ask my data" query (structured-output → typed filter). This is the highest-leverage story for an AI-engineer job search, since the app currently has zero AI surface.
+
+- **HARD BLOCK — owner's personal-API-key guardrail.** This is a public, unauthenticated app. No LLM key is wired until all four are confirmed: (1) a **dedicated, isolated** Vercel AI Gateway workspace for this app; (2) a **scoped key** minted in it, used only here; (3) a **hard spend/usage cap + alert** that can't be bypassed client-side; (4) **explicit owner confirmation** the key is not the personal/default key. Tracked in `BLOCKED.md`.
+- **Also required before public exposure:** server-side rate limiting on the insights endpoint (ties to N4 WAF), and a strict allowlist of what leaves the server (aggregates only — the model never sees raw workouts or the ingest secret).
+- **Success (once unblocked):** anonymous visitor can request an insight; the request is rate-limited; only whitelisted aggregates are sent; spend is capped; the feature is showcased on `/about`.
+
+### 15.5 Dynamic OG images + "Year in Movement" recap
+
+`@vercel/og` edge-rendered social cards showing live stats, plus a shareable year-in-review recap page. High visual impact when the link is pasted into LinkedIn/Slack; demonstrates edge rendering (a Vercel-native skill). Public, read-only, aggregate data only.
+
+- **Success:** pasting the site URL into LinkedIn/Slack renders a live-data card; a `/recap` (or similar) page summarizes the year.
+
+### 15.6 Goal-setting + projections
+
+"At current pace you'll hit X miles by year-end," reusing the existing `world-events.ts` reference lines ("that's 3.2 marathons"). Owner sets a goal; the dashboard projects pace-to-goal. Shows data modeling and product sense beyond raw charts. Goal is owner-write, projection is public-read.
+
+- **Success:** owner can set a yearly mile goal; dashboard shows projected year-end total and pace vs goal; anonymous visitor sees the projection read-only.
+
+### 15.7 Production-maturity touches
+
+Vercel Analytics + error tracking (e.g. Sentry) + a short public `/changelog`. Signals that the author thinks about apps after they ship. **Analytics/error-tracking that use a third-party key must clear the same personal-key guardrail** (§15.4) if the key is billed to the owner personally; Vercel-native Analytics is fine.
+
+- **Success:** page views and Web Vitals are collected; runtime errors are captured with source maps; `/changelog` lists shipped milestones.
+
+### 15.8 v3 non-goals
+
+- No change to the single-user / anonymous-public audience model (§4). No multi-user, no sign-up.
+- No new workout types, heart rate, or interval workouts (still §3 non-goals).
+- AI insights never expose raw personal records — aggregates only.
