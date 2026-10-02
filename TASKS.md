@@ -289,9 +289,9 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 ### Group P: Lighthouse Performance 63 → 90+
 
-- [ ] **P1** Baseline: run Lighthouse (mobile) on prod, record current Performance breakdown (LCP/TBT/CLS) and top opportunities.
-- [ ] **P2** Address the top offenders — likely defer/lazy offscreen charts (Recharts is heavy), trim client JS, review font/image loading, check hydration cost of islands.
-- [ ] **P3** Re-run Lighthouse; target Performance ≥ 90 with a11y/best-practices/SEO still 100. Update the `/about` live-metrics number.
+- [~] **P1** Baseline (browser-free proxy for Lighthouse, which needs a browser): measured the JS the dashboard actually pulls by starting the prod build and summing scripts/modulepreloads in `/`'s HTML. **Before: 1218 KB initial JS, incl. the 383 KB Recharts chunk eagerly on the critical path.** The prod Lighthouse Performance baseline was 63 (J8).
+- [x] **P2** Lazy-load the four below-the-fold charts (Recharts + react-activity-calendar) via `next/dynamic` (`ssr:false`) in a new `src/components/charts/lazy.tsx`; dashboard imports from it. Skeletons reserve each chart's height (no CLS). **After: 826 KB initial JS (−392 KB / −32%); Recharts no longer on the critical path.** Checked react-hook-form/zod/webauthn are already split; only `sonner` (41 KB) remains and is needed app-wide.
+- [ ] **P3** Confirm the actual Lighthouse Performance ≥ 90 (needs a browser run — see BLOCKED/owner). Then update the `/about` live-metrics number. The −32% initial-JS cut is a strong TBT/LCP signal but the score itself is unmeasured here.
 
 ### Group Q: Dynamic OG images + "Year in Movement" recap
 

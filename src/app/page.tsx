@@ -14,10 +14,14 @@ import { StreakCard } from "@/components/cards/streak-card"
 import { WeekCard } from "@/components/cards/week-card"
 import { YtdCard } from "@/components/cards/ytd-card"
 import { PrsPanel } from "@/components/cards/prs-panel"
-import { DailyStepsBar } from "@/components/charts/daily-steps-bar"
-import { WeeklyMilesLine } from "@/components/charts/weekly-miles-line"
-import { YearHeatmap } from "@/components/charts/year-heatmap"
-import { PaceInclineTrend } from "@/components/charts/pace-incline-trend"
+// Charts are heavy (Recharts + react-activity-calendar) and below the fold, so
+// they load lazily after hydration rather than on the initial critical path.
+import {
+  DailyStepsBar,
+  WeeklyMilesLine,
+  YearHeatmap,
+  PaceInclineTrend,
+} from "@/components/charts/lazy"
 import { EntryFormIsland } from "@/components/entry-form-island"
 import { MoodCardIsland } from "@/components/mood-card-island"
 import { WorkoutList } from "@/components/workout-list"
