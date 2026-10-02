@@ -291,7 +291,12 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 - [~] **P1** Baseline (browser-free proxy for Lighthouse, which needs a browser): measured the JS the dashboard actually pulls by starting the prod build and summing scripts/modulepreloads in `/`'s HTML. **Before: 1218 KB initial JS, incl. the 383 KB Recharts chunk eagerly on the critical path.** The prod Lighthouse Performance baseline was 63 (J8).
 - [x] **P2** Lazy-load the four below-the-fold charts (Recharts + react-activity-calendar) via `next/dynamic` (`ssr:false`) in a new `src/components/charts/lazy.tsx`; dashboard imports from it. Skeletons reserve each chart's height (no CLS). **After: 826 KB initial JS (−392 KB / −32%); Recharts no longer on the critical path.** Checked react-hook-form/zod/webauthn are already split; only `sonner` (41 KB) remains and is needed app-wide.
-- [ ] **P3** Confirm the actual Lighthouse Performance ≥ 90 (needs a browser run — see BLOCKED/owner). Then update the `/about` live-metrics number. The −32% initial-JS cut is a strong TBT/LCP signal but the score itself is unmeasured here.
+- [x] **P3** Ran headless Lighthouse (owner-approved, mobile, local prod build + seeded year of data). Root-caused the score: LCP was 5.1 s, **85% render-delay** — the text LCP waited on the Geist webfont (next/font wasn't emitting a preload) plus a 0.74 s TTFB. Fixes:
+  - **Font preload** — apply `geistSans.className` to `<body>` (not just the CSS `variable`) so next/font emits `<link rel=preload as=font>`. LCP 5.1 s → 3.1 s, Perf 65 → 82.
+  - **Parallelize the dashboard's two independent reads** in `getDailyTotalsRange` (were sequential). TTFB 0.74 s → 0.44 s.
+  - **Defer the below-the-fold WorkoutList** (client) too. TBT ~530 → ~450 ms; CLS still 0.
+  - **Result: Performance 63 → ~83** (LCP 3.0 s, FCP 1.0 s, Speed Index 5.3 → 2.3 s, CLS 0). Local simulated throttling is pessimistic (observed LCP 2.8 s); confirm ≥ 90 on the real CDN-backed deploy. `/about` has no Lighthouse metric to update.
+  - _Separately noted:_ a11y dropped 100 → 96 (`color-contrast`) in the earlier **editorial redesign**, not this work — track as its own fix.
 
 ### Group Q: Dynamic OG images + "Year in Movement" recap
 

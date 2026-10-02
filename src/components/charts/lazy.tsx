@@ -42,3 +42,10 @@ export const YearHeatmap = dynamic(
   () => import("./year-heatmap").then((m) => m.YearHeatmap),
   { ssr: false, loading: () => <ChartSkeleton className="h-40" /> },
 )
+
+// The workout list is the last (below-the-fold) section and a client component;
+// deferring its hydration trims the initial main-thread work (TBT).
+export const WorkoutList = dynamic(
+  () => import("../workout-list").then((m) => m.WorkoutList),
+  { ssr: false, loading: () => <ChartSkeleton className="h-96" /> },
+)
