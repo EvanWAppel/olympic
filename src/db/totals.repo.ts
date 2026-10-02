@@ -30,19 +30,6 @@ export async function getDailyTotalsRange(
 ): Promise<DisplayedDay[]> {
   const { startDate, endDate, timezone } = input
 
-  // Phone-reported daily totals for the range.
-  const phoneRows = await db
-    .select()
-    .from(dailyMetric)
-    .where(between(dailyMetric.date, startDate, endDate))
-
-  const phoneByDate = new Map(
-    phoneRows.map((r) => [
-      r.date,
-      { steps: r.steps, distanceMi: Number(r.distanceMi), activeCalories: Number(r.activeCalories) },
-    ]),
-  )
-
   // Treadmill workouts whose startAt falls in the range (with a 1-day cushion
   // on each side to catch timezone edge cases).
   const cushionStart = new Date(`${startDate}T00:00:00Z`)
@@ -50,16 +37,31 @@ export async function getDailyTotalsRange(
   const cushionEnd = new Date(`${endDate}T23:59:59Z`)
   cushionEnd.setUTCDate(cushionEnd.getUTCDate() + 1)
 
-  const treadmillRows = await db
-    .select()
-    .from(workouts)
-    .where(
-      and(
-        eq(workouts.source, "treadmill"),
-        gte(workouts.startAt, cushionStart),
-        lte(workouts.startAt, cushionEnd),
+  // The two reads are independent — run them in parallel to save a round-trip
+  // (this query is on the dashboard's TTFB critical path).
+  const [phoneRows, treadmillRows] = await Promise.all([
+    db
+      .select()
+      .from(dailyMetric)
+      .where(between(dailyMetric.date, startDate, endDate)),
+    db
+      .select()
+      .from(workouts)
+      .where(
+        and(
+          eq(workouts.source, "treadmill"),
+          gte(workouts.startAt, cushionStart),
+          lte(workouts.startAt, cushionEnd),
+        ),
       ),
-    )
+  ])
+
+  const phoneByDate = new Map(
+    phoneRows.map((r) => [
+      r.date,
+      { steps: r.steps, distanceMi: Number(r.distanceMi), activeCalories: Number(r.activeCalories) },
+    ]),
+  )
 
   const treadmillByDate = new Map<
     string,

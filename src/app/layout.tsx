@@ -73,7 +73,12 @@ export default async function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col overflow-x-hidden bg-background text-foreground">
+      {/* Applying the font's own className (not just the CSS variable) is what
+          makes next/font emit a <link rel="preload"> for it — without this the
+          Geist file is discovered late via CSS, delaying the (text) LCP. */}
+      <body
+        className={`${geistSans.className} min-h-full flex flex-col overflow-x-hidden bg-background text-foreground`}
+      >
         <SiteHeader ownerMode={ownerMode} />
         {children}
         <Toaster richColors position="top-center" />
