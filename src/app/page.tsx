@@ -21,10 +21,11 @@ import {
   WeeklyMilesLine,
   YearHeatmap,
   PaceInclineTrend,
+  WorkoutList,
 } from "@/components/charts/lazy"
 import { EntryFormIsland } from "@/components/entry-form-island"
 import { MoodCardIsland } from "@/components/mood-card-island"
-import { WorkoutList } from "@/components/workout-list"
+
 import { SectionErrorBoundary } from "@/components/section-error-boundary"
 
 export const dynamic = "force-dynamic"
