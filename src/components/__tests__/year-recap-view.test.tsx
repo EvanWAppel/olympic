@@ -55,6 +55,16 @@ describe("<YearRecapView>", () => {
     expect(within(moments).getByText(/33% treadmill/)).toBeInTheDocument()
   })
 
+  it("dates a best week that began in the previous year with its year", () => {
+    render(
+      <YearRecapView
+        recap={makeRecap({ year: 2026, bestWeek: { weekStart: "2025-12-29", miles: 30 } })}
+        years={[2026]}
+      />,
+    )
+    expect(screen.getByText(/Week of December 29, 2025/)).toBeInTheDocument()
+  })
+
   it("omits moments that don't exist rather than showing zeros", () => {
     render(
       <YearRecapView
@@ -74,8 +84,10 @@ describe("<YearRecapView>", () => {
     const list = screen.getByRole("list", { name: /miles by month/i })
     const items = within(list).getAllByRole("listitem")
     expect(items).toHaveLength(12)
-    expect(items[0]).toHaveAccessibleName("January: 10 miles")
-    expect(items[11]).toHaveAccessibleName("December: not yet")
+    // Real text (visually hidden), not aria-label, so every screen reader reads it.
+    expect(within(items[0]).getByText("January: 10 miles")).toBeInTheDocument()
+    expect(within(items[11]).getByText("December: not yet")).toBeInTheDocument()
+    expect(items[0]).not.toHaveAttribute("aria-label")
   })
 
   it("links to the other recap years, marking the current one", () => {

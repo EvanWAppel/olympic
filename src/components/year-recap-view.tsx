@@ -95,7 +95,10 @@ export function YearRecapView({ recap, years }: { recap: YearRecap; years: numbe
             {bestWeek && (
               <Moment
                 label="Best week"
-                detail={`Week of ${formatDate(bestWeek.weekStart)}`}
+                detail={`Week of ${formatDate(
+                  bestWeek.weekStart,
+                  !bestWeek.weekStart.startsWith(`${recap.year}-`),
+                )}`}
                 value={`${fmt(bestWeek.miles)} mi`}
               />
             )}
@@ -123,11 +126,10 @@ export function YearRecapView({ recap, years }: { recap: YearRecap; years: numbe
               {recap.months.map(({ month, miles }) => {
                 const name = MONTHS[month - 1]
                 return (
-                  <li
-                    key={month}
-                    aria-label={miles === null ? `${name}: not yet` : `${name}: ${fmt(miles)} miles`}
-                    className={miles === null ? "is-future" : undefined}
-                  >
+                  <li key={month} className={miles === null ? "is-future" : undefined}>
+                    <span className="sr-only">
+                      {miles === null ? `${name}: not yet` : `${name}: ${fmt(miles)} miles`}
+                    </span>
                     <span
                       className="recap-bar"
                       style={{ height: `${((miles ?? 0) / maxMonth) * 100}%` }}

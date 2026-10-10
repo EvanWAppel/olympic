@@ -13,15 +13,16 @@ function parseYear(raw: string): number | null {
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
-  const { year } = await params
-  const title = `${year} in movement — Olympic`
-  const description = `A year-in-review of ${year}: miles walked, steps, streaks, and best moments, from treadmill logs and Apple Health.`
+  // Never echo an unvalidated path segment into the title (404s render it too).
+  const year = parseYear((await params).year)
+  const title = year ? `${year} in movement — Olympic` : "Year in movement — Olympic"
+  const description = `A year-in-review${year ? ` of ${year}` : ""}: miles walked, steps, streaks, and best moments, from treadmill logs and Apple Health.`
   // Nested metadata objects replace (not merge with) the layout's, so restate
   // the shared fields. og:image comes from ./opengraph-image.tsx.
   return {
     title,
     description,
-    openGraph: { title, description, url: `/recap/${year}`, siteName: "Olympic", type: "website" },
+    openGraph: { title, description, url: year ? `/recap/${year}` : "/recap", siteName: "Olympic", type: "website" },
     twitter: { card: "summary_large_image", title, description },
   }
 }

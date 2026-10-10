@@ -18,4 +18,10 @@ describe("recap generateMetadata", () => {
     expect(meta.twitter?.title).toBe("2025 in movement — Olympic")
     expect(meta.openGraph?.url).toBe("/recap/2025")
   })
+
+  it("never echoes a non-year path segment into the title", async () => {
+    const meta = await generateMetadata({ params: Promise.resolve({ year: "Evan quit" }) })
+    expect(meta.title).toBe("Year in movement — Olympic")
+    expect(JSON.stringify(meta)).not.toContain("Evan quit")
+  })
 })
