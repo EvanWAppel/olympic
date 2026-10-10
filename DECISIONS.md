@@ -44,3 +44,18 @@ Append-only log of decisions with a real trade-off (chose X, rejected Y, why). N
 **Context.** Adversarial review of `feat/perf-lighthouse` flagged (medium) that deferring `WorkoutList` with `next/dynamic` `ssr:false` removed the work log from the server HTML: crawlers, no-JS visitors, and link-preview scrapers saw only an unlabeled skeleton, and a failed chunk load would leave it a skeleton forever.
 
 **Decision.** Revert that deferral; keep the font preload and parallel reads. Chose content-in-HTML over ~80 ms of TBT. The work log is the dashboard's substance on a public portfolio page, and the font + TTFB fixes carried most of the score gain anyway. Rejected keeping it deferred with an `aria-busy` skeleton: that's more accessible, but it still hides the content from crawlers and no-JS readers.
+
+## 2026-10-10 — Year-in-movement recap (Q3)
+
+**Context.** PRD §15.5 asks for a shareable year-in-review page. The owner chose per-year URLs and all four content blocks.
+
+**Decisions.**
+- **`/recap/[year]` with `/recap` redirecting to the newest year**, rather than a single current-year page. Each year gets a stable URL and its own OG card. Valid years run from the earliest data to the current local year; anything else 404s, so a guessed URL can't render an empty recap.
+- **A new pure `buildYearRecap` plus a separate DB loader**, rather than extending `getSocialStats`. social-stats is shaped for the rolling "now" card (YTD, current streak), while the recap needs any calendar year. Reuses `bucketByWeek`, `computePRs`' longest streak, and `getDailyTotalsRange`, so dedup behaves the same as on the dashboard.
+- **Workout counts and year bounds use the owner's local timezone in SQL** (`start_at at time zone tz`) instead of UTC. Otherwise a New Year's Eve evening walk counts toward the wrong year. Covered by a DB test.
+- **The month strip is server-rendered CSS bars with an accessible `<ol>`**, not Recharts. That keeps the recap off the 383 KB chart bundle and readable without JS, consistent with the 2026-10-10 SSR decision.
+- **The recap OG card falls back to a branded card on a DB error, and logs it** (`console.error` with a `[recap-og]` tag). Initially it let errors throw, per "don't hide errors". After review, the owner chose the fallback: a 500 means a broken unfurl wherever the link was shared. Logging keeps the failure visible in Vercel logs, so the error isn't hidden.
+- **Review fixes:** the month data is real visually-hidden text, not `aria-label`, because screen readers handle that unevenly on `<li>`. The metadata never echoes an unvalidated path segment. A best week that starts in the previous December is labelled with its year.
+- **Extracted the OG card chrome into `components/og-card.tsx`**, so the two cards can't drift apart in palette or layout.
+- **Switched the `SITE_URL` default to `olympic.evanappel.me`.** DNS is now on Cloudflare and the cert is verified, so absolute OG and canonical URLs use the permanent domain.
+

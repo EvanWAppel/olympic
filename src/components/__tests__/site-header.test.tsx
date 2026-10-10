@@ -26,6 +26,9 @@ describe("<SiteHeader>", () => {
     expect(
       screen.getByRole("link", { name: /about this build/i }),
     ).toHaveAttribute("href", "/about")
+    expect(
+      screen.getByRole("link", { name: /year in movement/i }),
+    ).toHaveAttribute("href", "/recap")
   })
 
   it("never renders a login button", () => {

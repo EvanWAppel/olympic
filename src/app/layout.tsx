@@ -6,10 +6,9 @@ import { SiteHeader } from "@/components/site-header"
 import { getSession } from "@/lib/session"
 import "./globals.css"
 
-// Interim domain while DNS for olympic.evanappel.me propagates. Override with
-// NEXT_PUBLIC_SITE_URL once the permanent domain's cert is verified.
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://olympic-lime-six.vercel.app"
+// Permanent domain (DNS on Cloudflare → Vercel, cert verified 2026-10-10).
+// NEXT_PUBLIC_SITE_URL overrides it, e.g. for a preview deploy.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://olympic.evanappel.me"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
