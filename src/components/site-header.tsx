@@ -45,6 +45,9 @@ export function SiteHeader({ ownerMode = false }: { ownerMode?: boolean }) {
               </a>
             )
           })}
+          <Link href="/recap" className="underline-offset-4 hover:underline">
+            Year in movement
+          </Link>
           <Link
             href="/about"
             className="font-medium underline-offset-4 hover:underline"

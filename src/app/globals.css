@@ -110,6 +110,29 @@ a:hover { color: var(--primary); }
 .demo-notice a { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .dashboard-footer { margin-top: 22px; padding-top: 23px; border-top: 1px solid #bdc4b0; display: flex; justify-content: space-between; gap: 20px; color: #737867; font: 9px var(--font-geist-mono), monospace; letter-spacing: .8px; }
 @keyframes arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+/* Year-in-movement recap (/recap/[year]) */
+.recap-years { display: flex; gap: 14px; }
+.recap-years a { color: #686e5e; }
+.recap-years a[aria-current="page"] { color: var(--foreground); border-bottom: 1px solid var(--primary); }
+.recap-hero { padding: 25px 0 10px; }
+.recap-hero h1 { font-size: clamp(52px, 6.4vw, 92px); line-height: .92; font-weight: 650; letter-spacing: -.06em; margin: 18px 0 22px; }
+.recap-hero h1 em { color: var(--primary); font-family: Georgia, 'Times New Roman', serif; font-weight: 400; }
+.recap-miles { font-size: 22px; letter-spacing: -.5px; }
+.recap-miles strong { color: var(--primary); font-size: 64px; font-weight: 650; letter-spacing: -2.5px; margin-right: 8px; }
+.recap-miles span { display: block; margin-top: 6px; font-size: 13px; letter-spacing: 0; color: var(--muted-foreground); }
+.recap-totals { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid #d2d5c5; border-radius: 3px; }
+.recap-total { padding: 20px 24px; border-right: 1px solid #d2d5c5; min-width: 0; }
+.recap-total:last-child { border-right: 0; }
+.recap-total p { font-size: 32px; font-weight: 500; letter-spacing: -1.4px; line-height: 1.15; }
+.recap-total span { font: 10px var(--font-geist-mono), monospace; letter-spacing: 1px; text-transform: uppercase; color: var(--muted-foreground); }
+.recap-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 24px; }
+.recap-months { display: grid; grid-template-columns: repeat(12, 1fr); gap: 8px; align-items: end; height: 220px; }
+.recap-months li { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 8px; height: 100%; }
+.recap-bar { width: 100%; min-height: 2px; background: var(--primary); border-radius: 2px 2px 0 0; }
+.recap-months li.is-future .recap-bar { background: transparent; border-bottom: 1px dashed #bfc4b2; }
+.recap-month { font: 10px var(--font-geist-mono), monospace; color: var(--muted-foreground); }
+.recap-hero, .recap-totals { animation: arrive .65s ease both; }
+.recap-totals { animation-delay: .12s; }
 .hero-copy, .summary-grid { animation: arrive .65s ease both; }
 .summary-grid { animation-delay: .12s; }
 @media (min-width: 1500px) { .dashboard-hero { padding-top: 40px; padding-bottom: 45px; } }
@@ -143,5 +166,11 @@ a:hover { color: var(--primary); }
   .chart-heading [data-slot="card-title"] { font-size: 20px; }
   .period-label { font-size: 8px; padding: 6px; }
   .demo-notice, .dashboard-footer { flex-direction: column; }
+  .recap-totals { grid-template-columns: 1fr 1fr; }
+  .recap-total:nth-child(2) { border-right: 0; }
+  .recap-total:nth-child(-n+2) { border-bottom: 1px solid #d2d5c5; }
+  .recap-total p { font-size: 24px; }
+  .recap-grid { grid-template-columns: 1fr; }
+  .recap-months { gap: 4px; height: 160px; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }
