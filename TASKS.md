@@ -227,11 +227,7 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
   - [x] Env on Vercel Production+Development: `SESSION_SECRET`, `BOOTSTRAP_REGISTRATION_SECRET`, `RP_ID=olympic.evanappel.me`, `RP_ORIGIN=https://olympic.evanappel.me`
   - [x] Decided permanent domain: **olympic.evanappel.me** (passkey rpID + resume link); attached to project
   - [x] Deployed v2 auth code to Production (additive; still behind deployment protection); aliased to olympic.evanappel.me
-  - [ ] **Blocked on DNS:** add `A olympic → 76.76.21.21` at Wix (evanappel.me nameservers = ns6/ns7.wixdns.net); wait for Vercel verification + cert
-  - [ ] **Interim (while DNS propagates):** work against the default Vercel domain **`olympic-lime-six.vercel.app`**. For passkeys to work there, set Vercel env `RP_ID=olympic-lime-six.vercel.app` + `RP_ORIGIN=https://olympic-lime-six.vercel.app` (or **unset** both — `getRpConfig` falls back to the request Origin), then redeploy. Swap back to `olympic.evanappel.me` once the A record verifies.
-  - [ ] On iPhone: open `https://olympic-lime-six.vercel.app/login` → "Register a device" → paste `BOOTSTRAP_REGISTRATION_SECRET` (from `.env.local`) → Face ID
-  - [ ] Confirm login round-trips; register laptop as 2nd device
-  - [ ] After first credential registered: consider rotating/removing `BOOTSTRAP_REGISTRATION_SECRET` (N-phase)
+  - [ ] Owner steps (DNS A record, iPhone + laptop passkey registration, retire bootstrap secret) moved to **`BLOCKED.md`**.
 
 ### Group L: Access control & public/private split
 
