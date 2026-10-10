@@ -227,7 +227,8 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
   - [x] Env on Vercel Production+Development: `SESSION_SECRET`, `BOOTSTRAP_REGISTRATION_SECRET`, `RP_ID=olympic.evanappel.me`, `RP_ORIGIN=https://olympic.evanappel.me`
   - [x] Decided permanent domain: **olympic.evanappel.me** (passkey rpID + resume link); attached to project
   - [x] Deployed v2 auth code to Production (additive; still behind deployment protection); aliased to olympic.evanappel.me
-  - [ ] Owner steps (DNS A record, iPhone + laptop passkey registration, retire bootstrap secret) moved to **`BLOCKED.md`**.
+  - [x] DNS: moved Wix → Cloudflare; `olympic.evanappel.me` resolves to Vercel and serves HTTPS with a valid cert (verified 2026-10-10)
+  - [ ] Owner steps (iPhone + laptop passkey registration, retire bootstrap secret) are in **`BLOCKED.md`**.
 
 ### Group L: Access control & public/private split
 
