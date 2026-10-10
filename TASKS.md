@@ -294,7 +294,7 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 - [x] **P3** Ran headless Lighthouse (owner-approved, mobile, local prod build + seeded year of data). Root-caused the score: LCP was 5.1 s, **85% render-delay** — the text LCP waited on the Geist webfont (next/font wasn't emitting a preload) plus a 0.74 s TTFB. Fixes:
   - **Font preload** — apply `geistSans.className` to `<body>` (not just the CSS `variable`) so next/font emits `<link rel=preload as=font>`. LCP 5.1 s → 3.1 s, Perf 65 → 82.
   - **Parallelize the dashboard's two independent reads** in `getDailyTotalsRange` (were sequential). TTFB 0.74 s → 0.44 s.
-  - **Defer the below-the-fold WorkoutList** (client) too. TBT ~530 → ~450 ms; CLS still 0.
+  - ~~Defer the below-the-fold WorkoutList~~ — tried (TBT ~530 → ~450 ms) but **reverted after review**: `ssr:false` dropped the work log from the server HTML. The list stays server-rendered.
   - **Result: Performance 63 → ~83** (LCP 3.0 s, FCP 1.0 s, Speed Index 5.3 → 2.3 s, CLS 0). Local simulated throttling is pessimistic (observed LCP 2.8 s); confirm ≥ 90 on the real CDN-backed deploy. `/about` has no Lighthouse metric to update.
   - _Separately noted:_ a11y dropped 100 → 96 (`color-contrast`) in the earlier **editorial redesign**, not this work — track as its own fix.
 

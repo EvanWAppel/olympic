@@ -36,5 +36,11 @@ Append-only log of decisions with a real trade-off (chose X, rejected Y, why). N
 **Update (owner-approved headless Lighthouse run).** The JS cut alone moved the score only 63→65: the bottleneck was LCP 5.1 s, 85% *render-delay*. Root cause was a **text LCP waiting on the Geist webfont**, which next/font wasn't preloading because only the CSS `variable` was applied, not the font's `.className`. Decisions:
 - **Apply `geistSans.className` to `<body>`** to trigger next/font's preload (keeping the CSS variables for `--font-geist-mono` usage). LCP 5.1 s → 3.1 s; Perf 65 → 82. Lowest-risk, highest-impact lever.
 - **Parallelize the two independent reads in `getDailyTotalsRange`** (phone metrics + treadmill workouts) rather than caching the dashboard. Caching would cut TTFB more but needs tag-invalidation across every write route and risks staleness/dedup bugs; parallelizing is a pure, test-covered win (TTFB 0.74 s → 0.44 s) with no correctness surface.
-- **Defer the below-the-fold WorkoutList** like the charts (TBT help, CLS stayed 0).
+- ~~Defer the below-the-fold WorkoutList~~ — superseded, see 2026-10-10.
 - **Stopped at ~83 rather than chasing the last points with risky caching.** The local simulation is pessimistic (observed LCP 2.8 s); the real CDN-backed deploy should score higher, so the ≥ 90 confirmation belongs on prod. Deeper caching stays an option if prod falls short.
+
+## 2026-10-10 — Keep the workout list server-rendered (Group P review)
+
+**Context.** Adversarial review of `feat/perf-lighthouse` flagged (medium) that deferring `WorkoutList` with `next/dynamic` `ssr:false` removed the work log from the server HTML: crawlers, no-JS visitors, and link-preview scrapers saw only an unlabeled skeleton, and a failed chunk load would leave it a skeleton forever.
+
+**Decision.** Revert that deferral; keep the font preload and parallel reads. Chose content-in-HTML over ~80 ms of TBT. The work log is the dashboard's substance on a public portfolio page, and the font + TTFB fixes carried most of the score gain anyway. Rejected keeping it deferred with an `aria-busy` skeleton: that's more accessible, but it still hides the content from crawlers and no-JS readers.
