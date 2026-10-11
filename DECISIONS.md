@@ -59,3 +59,16 @@ Append-only log of decisions with a real trade-off (chose X, rejected Y, why). N
 - **Extracted the OG card chrome into `components/og-card.tsx`**, so the two cards can't drift apart in palette or layout.
 - **Switched the `SITE_URL` default to `olympic.evanappel.me`.** DNS is now on Cloudflare and the cert is verified, so absolute OG and canonical URLs use the permanent domain.
 
+## 2026-10-10 — Goal-setting + projections (Group R)
+
+**Context.** PRD §15.6: the owner sets a yearly mile goal; the dashboard projects year-end miles; visitors see it read-only. The owner chose YTD pace + needed pace, inline editing on the card, a public goal, and distance landmarks.
+
+**Decisions.**
+- **Project from the YTD pace, not a trailing window.** It's steady day to day and easy to explain ("miles ÷ days × 365"). A trailing 4-week pace reacts faster but swings hard after a sick week. Today counts as elapsed, so morning projections lean slightly conservative instead of optimistic.
+- **Ahead/behind is measured against the goal's straight-line pro-rata share to date**, and "needed" is the remaining miles over the remaining weeks. Rejected: seasonally weighted targets. They're more accurate for a walker, but they need history the model doesn't have, and they're hard to explain on a card.
+- **Nullable column, no default goal.** "No goal" is a real state (the card then shows only the projection). Inventing a default would publish a target the owner never chose.
+- **Migration is additive, and it gets applied to prod before merge.** Migrations here are manual (`pnpm db:migrate`), and `getSettings()` selects every column. If the code deploys first, the dashboard breaks. If the migration lands first, nothing breaks, because the old code ignores the extra column.
+- **The editor is a small client island inside a server card**, reusing the owner-only `PATCH /api/settings`. Rejected: a new goal endpoint, which would duplicate the guard for no gain. Rejected: making the whole card a client component, which would add JS for every anonymous visitor.
+- **Landmarks: pick the one closest in scale (smallest |log ratio|)**, shown as a share when short ("68% of the Appalachian Trail") or a multiple when past it. Rejected "largest landmark not exceeded": it yields flat, big multiples like "2.9× the Camino" where "66% of the AT" reads better. Distances are commonly cited, rounded route lengths, and the list is hand-curated so the owner can edit it.
+- **Demo goal 1,500 mi** (not 15 mi/week × 52 = 780), so `/demo` shows an in-progress goal instead of "Goal met".
+

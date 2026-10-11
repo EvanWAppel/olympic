@@ -110,6 +110,10 @@ a:hover { color: var(--primary); }
 .demo-notice a { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .dashboard-footer { margin-top: 22px; padding-top: 23px; border-top: 1px solid #bdc4b0; display: flex; justify-content: space-between; gap: 20px; color: #737867; font: 9px var(--font-geist-mono), monospace; letter-spacing: .8px; }
 @keyframes arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+/* Year-end projection card */
+.goal-card .goal-figure { color: var(--primary); }
+.goal-progress { height: 4px; background: var(--muted); border-radius: 2px; overflow: hidden; }
+.goal-progress > span { display: block; height: 100%; background: #7b8660; }
 /* Year-in-movement recap (/recap/[year]) */
 .recap-years { display: flex; gap: 14px; }
 .recap-years a { color: #686e5e; }

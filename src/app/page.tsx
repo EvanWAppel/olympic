@@ -13,6 +13,8 @@ import { TodayCard } from "@/components/cards/today-card"
 import { StreakCard } from "@/components/cards/streak-card"
 import { WeekCard } from "@/components/cards/week-card"
 import { YtdCard } from "@/components/cards/ytd-card"
+import { GoalCard } from "@/components/cards/goal-card"
+import { projectYear } from "@/lib/projection"
 import { PrsPanel } from "@/components/cards/prs-panel"
 // Charts are heavy (Recharts + react-activity-calendar) and below the fold, so
 // they load lazily after hydration rather than on the initial critical path.
@@ -66,6 +68,11 @@ export default async function Home() {
   const ytdMiles = totals
     .filter((t) => t.date >= yearStart)
     .reduce((sum, t) => sum + t.totalDistanceMi, 0)
+  const projection = projectYear({
+    ytdMiles,
+    today,
+    goal: s.yearlyMilesGoal === null ? null : Number(s.yearlyMilesGoal),
+  })
   const ytdWorkoutCount = workouts.filter(
     (w) => localDateKey(w.startAt, timezone) >= yearStart,
   ).length
@@ -124,6 +131,10 @@ export default async function Home() {
           <WeekCard miles={thisWeekMiles} goalMiles={milesGoal} />
           <YtdCard miles={ytdMiles} workoutCount={ytdWorkoutCount} />
         </div>
+      </SectionErrorBoundary>
+
+      <SectionErrorBoundary name="Year-end projection">
+        <GoalCard projection={projection} ownerMode={ownerMode} />
       </SectionErrorBoundary>
 
       {ownerMode && (

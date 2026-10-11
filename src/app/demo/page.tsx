@@ -8,6 +8,8 @@ import { TodayCard } from "@/components/cards/today-card"
 import { StreakCard } from "@/components/cards/streak-card"
 import { WeekCard } from "@/components/cards/week-card"
 import { YtdCard } from "@/components/cards/ytd-card"
+import { GoalCard } from "@/components/cards/goal-card"
+import { projectYear } from "@/lib/projection"
 import { PrsPanel } from "@/components/cards/prs-panel"
 import { DailyStepsBar } from "@/components/charts/daily-steps-bar"
 import { WeeklyMilesLine } from "@/components/charts/weekly-miles-line"
@@ -18,6 +20,7 @@ import {
   demoDailyTotals,
   demoMilesGoal,
   demoStepGoal,
+  demoYearlyMilesGoal,
   demoTimezone,
   demoWorkouts,
 } from "@/lib/demo/sample"
@@ -52,6 +55,7 @@ export default function DemoPage() {
   const ytdMiles = totals
     .filter((t) => t.date >= yearStart)
     .reduce((sum, t) => sum + t.totalDistanceMi, 0)
+  const projection = projectYear({ ytdMiles, today, goal: demoYearlyMilesGoal })
   const ytdWorkoutCount = workouts.filter(
     (w) => localDateKey(w.startAt, timezone) >= yearStart,
   ).length
@@ -101,6 +105,10 @@ export default function DemoPage() {
           <WeekCard miles={thisWeekMiles} goalMiles={milesGoal} />
           <YtdCard miles={ytdMiles} workoutCount={ytdWorkoutCount} />
         </div>
+      </SectionErrorBoundary>
+
+      <SectionErrorBoundary name="Year-end projection">
+        <GoalCard projection={projection} ownerMode={false} />
       </SectionErrorBoundary>
 
       <SectionErrorBoundary name="Daily steps">

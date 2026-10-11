@@ -33,6 +33,7 @@ afterAll(async () => {
       strideIn: snapshot.strideIn,
       dailyStepGoal: snapshot.dailyStepGoal,
       weeklyMilesGoal: snapshot.weeklyMilesGoal,
+      yearlyMilesGoal: snapshot.yearlyMilesGoal,
       timezone: snapshot.timezone,
     })
   }
@@ -101,5 +102,26 @@ describe("/api/settings", () => {
       }),
     )
     expect(res.status).toBe(400)
+  })
+
+  it("PATCH sets and clears the yearly miles goal", async () => {
+    const patch = (body: unknown) =>
+      PATCH(
+        new Request("http://localhost/api/settings", {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(body),
+        }),
+      )
+    const set = await patch({ yearlyMilesGoal: 1200 })
+    expect(set.status).toBe(200)
+    expect(Number((await set.json()).yearlyMilesGoal)).toBe(1200)
+
+    const cleared = await patch({ yearlyMilesGoal: null })
+    expect(cleared.status).toBe(200)
+    expect((await cleared.json()).yearlyMilesGoal).toBeNull()
+
+    expect((await patch({ yearlyMilesGoal: 0 })).status).toBe(400)
+    expect((await patch({ yearlyMilesGoal: 100_000 })).status).toBe(400)
   })
 })

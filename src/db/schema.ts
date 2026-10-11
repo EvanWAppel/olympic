@@ -44,6 +44,8 @@ export const settings = pgTable("settings", {
   weeklyMilesGoal: numeric("weekly_miles_goal", { precision: 5, scale: 1 })
     .notNull()
     .default("20"),
+  // Optional yearly target for the goal/projection card; null = no goal set.
+  yearlyMilesGoal: numeric("yearly_miles_goal", { precision: 6, scale: 1 }),
   timezone: text("timezone").notNull().default("America/New_York"),
   healthIngestSecret: text("health_ingest_secret")
     .notNull()

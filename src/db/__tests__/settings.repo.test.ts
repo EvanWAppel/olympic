@@ -29,6 +29,7 @@ afterAll(async () => {
       strideIn: originalSnapshot.strideIn,
       dailyStepGoal: originalSnapshot.dailyStepGoal,
       weeklyMilesGoal: originalSnapshot.weeklyMilesGoal,
+      yearlyMilesGoal: originalSnapshot.yearlyMilesGoal,
       timezone: originalSnapshot.timezone,
     })
   }
@@ -59,6 +60,13 @@ describe("settings repo", () => {
     expect(after.dailyStepGoal).toBe(12_000)
     expect(Number(after.weeklyMilesGoal)).toBe(25)
     expect(after.timezone).toBe("America/Los_Angeles")
+  })
+
+  it("yearlyMilesGoal is optional: persists a goal and clears back to null", async () => {
+    await updateSettings({ yearlyMilesGoal: "1200" })
+    expect(Number((await getSettings()).yearlyMilesGoal)).toBe(1200)
+    await updateSettings({ yearlyMilesGoal: null })
+    expect((await getSettings()).yearlyMilesGoal).toBeNull()
   })
 
   it("calling getSettings twice returns the same row (singleton)", async () => {

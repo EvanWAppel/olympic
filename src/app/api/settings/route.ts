@@ -8,6 +8,8 @@ const PatchSchema = z.object({
   strideIn: z.number().positive().max(100).optional(),
   dailyStepGoal: z.number().int().positive().max(1_000_000).optional(),
   weeklyMilesGoal: z.number().positive().max(1000).optional(),
+  // null clears the goal.
+  yearlyMilesGoal: z.number().positive().max(10_000).nullable().optional(),
   timezone: z.string().min(1).max(100).optional(),
 })
 
@@ -40,6 +42,9 @@ export async function PATCH(req: Request) {
     ...(data.dailyStepGoal !== undefined && { dailyStepGoal: data.dailyStepGoal }),
     ...(data.weeklyMilesGoal !== undefined && {
       weeklyMilesGoal: data.weeklyMilesGoal.toString(),
+    }),
+    ...(data.yearlyMilesGoal !== undefined && {
+      yearlyMilesGoal: data.yearlyMilesGoal === null ? null : data.yearlyMilesGoal.toString(),
     }),
     ...(data.timezone !== undefined && { timezone: data.timezone }),
   })
