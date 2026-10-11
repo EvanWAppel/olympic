@@ -81,3 +81,31 @@ Append-only log of decisions with a real trade-off (chose X, rejected Y, why). N
   - The dashboard's data window starts at `trailingYearStart(today)` (never after Jan 1), which fixes a pre-existing leap-year gap where Dec 31 dropped Jan 1 from YTD.
 - **Demo goal 1,500 mi** (not 15 mi/week × 52 = 780), so `/demo` shows an in-progress goal instead of "Goal met".
 
+## 2026-10-10 — Production exposure: v1 build leaked the Health ingest secret (incident)
+
+**What happened.** While verifying a schema change, a smoke test of `olympic.evanappel.me` showed that production was still a **v1 deployment from 2026-07-01**. Deploys were manual (`vercel --prod`), and none had run since. Vercel Deployment Protection was **off** for the project. v1 predates the v2 owner guards, so anonymous requests could:
+- read `GET /api/settings`, including `healthIngestSecret` (presence checked by key only; the value was never printed);
+- reach v1's write routes (`POST /api/workouts` got as far as validation).
+
+Six older v1 deployment URLs (`*-evan-appel-s-projects.vercel.app`) served the same thing. The exposure probably dates from that deploy on `olympic-lime-six.vercel.app`, and the custom domain carried it from when DNS went live.
+
+**Response (each step owner-approved, in order).**
+1. **Paused the Vercel project.** Every hostname returned 503 and the leak stopped.
+2. **Verified `main`.** Anonymous probes of every private route on a local prod build all returned 401/403/307. Public `GET /api/workouts` includes `notes`, which matches the PRD ("notes preview" is public).
+3. **Deployed `main` to production.** Vercel blocks production builds while a project is paused, so it was unpaused for the ~2-minute build. The owner accepted that window, since the secret was already compromised and rotation follows.
+4. **Re-checked on prod.** Both hostnames returned 401 on every private route, and `/`, `/about`, `/recap`, and the OG card returned 200.
+5. **Re-enabled Deployment Protection** (Vercel Authentication, `all_except_custom_domains`). All generated deployment URLs, including the six v1 ones, now redirect to Vercel login.
+
+**Still open (BLOCKED.md):** rotate the ingest secret (needs the owner's passkey, now possible because v2 is live), and check for data written during the window.
+
+**Decisions / lessons.**
+- **Keep Standard Protection on permanently.** That replaces N6's original "turn protection off". The public surface is the custom domain only, and generated URLs, which can serve stale builds, stay gated.
+- **Rejected deleting the v1 deployments.** Protection closes them reversibly. Rolling back to v1 would reopen the leak anyway.
+- **The deploy gap is the root cause, not a code bug.** v2's guards were correct but never shipped. Follow-ups: make deploys visible (a check that compares the prod deployment's commit with `main`, or Git-integrated deploys), and make every production smoke test include an anonymous probe of private routes (as N7 intended).
+
+## 2026-10-10 — Production schema + migration ledger reconciled
+
+**Context.** Applying Group R's migration showed prod's Drizzle ledger out of sync with the repo. The webauthn migration was recorded under its pre-renumbering timestamp (it had been `0002`), and `0002_modern_the_phantom` (the `daily_mood` table) had **never been applied**. Mood would have failed at the first owner login. A plain `pnpm db:migrate` would have re-run the webauthn migration and failed.
+
+**Decision (owner-approved).** One transaction applied `0002` (CREATE TABLE `daily_mood`) and `0004` (ADD COLUMN `yearly_miles_goal`), inserted their ledger rows (sha256 of each file, as Drizzle does), and moved `0003`'s ledger timestamp to its journal value. A guard rolls the whole thing back unless exactly one `0003` row matches. Verified afterwards: the ledger matches the journal 5/5, and `pnpm db:migrate` is a no-op. Rejected: applying only `0004`, which would have left mood broken and the ledger booby-trapped for the next migration.
+
