@@ -5,7 +5,7 @@ import { getSettings } from "@/db/settings.repo"
 import { getSession } from "@/lib/session"
 import { getDailyTotalsRange } from "@/db/totals.repo"
 import { getMood } from "@/db/mood.repo"
-import { addDays, localDateKey } from "@/lib/dates"
+import { localDateKey, trailingYearStart } from "@/lib/dates"
 import { computeStreak } from "@/lib/streak"
 import { computePRs } from "@/lib/prs"
 import { bucketByWeek, bucketPaceIncline } from "@/lib/chart-data"
@@ -13,6 +13,8 @@ import { TodayCard } from "@/components/cards/today-card"
 import { StreakCard } from "@/components/cards/streak-card"
 import { WeekCard } from "@/components/cards/week-card"
 import { YtdCard } from "@/components/cards/ytd-card"
+import { GoalCard } from "@/components/cards/goal-card"
+import { projectYear } from "@/lib/projection"
 import { PrsPanel } from "@/components/cards/prs-panel"
 // Charts are heavy (Recharts + react-activity-calendar) and below the fold, so
 // they load lazily after hydration rather than on the initial critical path.
@@ -35,7 +37,7 @@ export default async function Home() {
   const timezone = s.timezone
   const today = localDateKey(new Date(), timezone)
   const yearStart = `${today.slice(0, 4)}-01-01`
-  const rangeStart = addDays(today, -364)
+  const rangeStart = trailingYearStart(today)
 
   const [totals, workouts, mood] = await Promise.all([
     getDailyTotalsRange({ startDate: rangeStart, endDate: today, timezone }),
@@ -66,6 +68,11 @@ export default async function Home() {
   const ytdMiles = totals
     .filter((t) => t.date >= yearStart)
     .reduce((sum, t) => sum + t.totalDistanceMi, 0)
+  const projection = projectYear({
+    ytdMiles,
+    today,
+    goal: s.yearlyMilesGoal === null ? null : Number(s.yearlyMilesGoal),
+  })
   const ytdWorkoutCount = workouts.filter(
     (w) => localDateKey(w.startAt, timezone) >= yearStart,
   ).length
@@ -124,6 +131,10 @@ export default async function Home() {
           <WeekCard miles={thisWeekMiles} goalMiles={milesGoal} />
           <YtdCard miles={ytdMiles} workoutCount={ytdWorkoutCount} />
         </div>
+      </SectionErrorBoundary>
+
+      <SectionErrorBoundary name="Year-end projection">
+        <GoalCard projection={projection} ownerMode={ownerMode} />
       </SectionErrorBoundary>
 
       {ownerMode && (

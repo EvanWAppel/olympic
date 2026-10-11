@@ -1,0 +1,1 @@
+ALTER TABLE "settings" ADD COLUMN "yearly_miles_goal" numeric(6, 1);

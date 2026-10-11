@@ -25,6 +25,7 @@ export type SettingsUpdate = Partial<
     | "strideIn"
     | "dailyStepGoal"
     | "weeklyMilesGoal"
+    | "yearlyMilesGoal"
     | "timezone"
     | "healthIngestSecret"
   >

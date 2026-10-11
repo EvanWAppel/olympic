@@ -7,6 +7,8 @@ import { addDays } from "@/lib/dates"
 export const demoTimezone = "America/Los_Angeles"
 export const demoStepGoal = 10000
 export const demoMilesGoal = 15
+// Set just under the demo walker's pace so the card shows an in-progress goal.
+export const demoYearlyMilesGoal = 1500
 export const demoSettings = { weightLb: 175, strideIn: 30 }
 
 const STRIDE_IN = demoSettings.strideIn
