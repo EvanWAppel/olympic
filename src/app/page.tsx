@@ -5,7 +5,7 @@ import { getSettings } from "@/db/settings.repo"
 import { getSession } from "@/lib/session"
 import { getDailyTotalsRange } from "@/db/totals.repo"
 import { getMood } from "@/db/mood.repo"
-import { addDays, localDateKey } from "@/lib/dates"
+import { localDateKey, trailingYearStart } from "@/lib/dates"
 import { computeStreak } from "@/lib/streak"
 import { computePRs } from "@/lib/prs"
 import { bucketByWeek, bucketPaceIncline } from "@/lib/chart-data"
@@ -37,7 +37,7 @@ export default async function Home() {
   const timezone = s.timezone
   const today = localDateKey(new Date(), timezone)
   const yearStart = `${today.slice(0, 4)}-01-01`
-  const rangeStart = addDays(today, -364)
+  const rangeStart = trailingYearStart(today)
 
   const [totals, workouts, mood] = await Promise.all([
     getDailyTotalsRange({ startDate: rangeStart, endDate: today, timezone }),

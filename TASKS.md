@@ -304,7 +304,7 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 ### Group R: Goal-setting + projections
 
-- [x] **R1** Nullable `settings.yearly_miles_goal` numeric(6,1) (migration `0004_yearly_miles_goal.sql`, additive). Owner-only `PATCH /api/settings` accepts `yearlyMilesGoal` (1–10,000, or `null` to clear). Repo + route tests. ⚠️ **Apply `0004` to prod before merging** (`pnpm db:migrate`). The deployed code selects every settings column.
+- [x] **R1** Nullable `settings.yearly_miles_goal` numeric(6,1) (migration `0004_yearly_miles_goal.sql`, additive). Owner-only `PATCH /api/settings` accepts `yearlyMilesGoal` (1–10,000, or `null` to clear). Repo + route tests. ✅ Applied to prod 2026-10-10, ahead of merge, as part of the ledger reconcile (see DECISIONS).
 - [x] **R2** `lib/projection.ts`: year-end projection at the YTD pace (today counts, leap-aware), with a goal it also gives status (met / on-track / behind), % vs the pro-rata pace, and miles/week needed. `lib/landmarks.ts`: a hand-curated list of distance landmarks plus `describeDistance` (the landmark closest in scale). Replaces the PRD's "world-events comparisons", which the owner clarified meant distance landmarks. 14 tests.
 - [x] **R3** `GoalCard` (server) on the dashboard and `/demo`: projection, landmark, and goal + progress + ahead/behind line, all public. In owner mode it adds the `GoalEditor` client island (inline set / edit / clear via `PATCH /api/settings`). 12 component tests. Verified with curl on a prod build: anonymous HTML has the projection and no editor.
 

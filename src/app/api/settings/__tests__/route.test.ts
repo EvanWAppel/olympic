@@ -122,6 +122,7 @@ describe("/api/settings", () => {
     expect((await cleared.json()).yearlyMilesGoal).toBeNull()
 
     expect((await patch({ yearlyMilesGoal: 0 })).status).toBe(400)
+    expect((await patch({ yearlyMilesGoal: 0.04 })).status).toBe(400)
     expect((await patch({ yearlyMilesGoal: 100_000 })).status).toBe(400)
   })
 })

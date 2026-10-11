@@ -24,14 +24,21 @@ describe("<GoalCard> public mode", () => {
 
   it("puts the projection in landmark terms", () => {
     render(<GoalCard projection={at(400, null)} ownerMode={false} />)
-    // 1460 mi → closest in scale is the Appalachian Trail (2197) at 0.66×.
-    expect(screen.getByText(/66% of the Appalachian Trail/)).toBeInTheDocument()
+    // 1460 mi → closest in scale is Britain end to end (1200) at 1.2×.
+    expect(screen.getByText(/1\.2× Britain end to end/)).toBeInTheDocument()
   })
 
   it("shows behind status with the weekly miles needed", () => {
     render(<GoalCard projection={at(300, 1500)} ownerMode={false} />)
     expect(screen.getByText(/27% behind pace/i)).toBeInTheDocument()
     expect(screen.getByText(/31\.7 mi\/week to get there/i)).toBeInTheDocument()
+  })
+
+  it("never says 'ahead' while behind, even when the gap rounds to 0%", () => {
+    // Pro-rata at day 100 of a 1095 goal is 300; 299 is 0.3% behind.
+    render(<GoalCard projection={at(299, 1095)} ownerMode={false} />)
+    expect(screen.queryByText(/ahead/i)).not.toBeInTheDocument()
+    expect(screen.getByText(/just behind pace/i)).toBeInTheDocument()
   })
 
   it("celebrates a met goal", () => {

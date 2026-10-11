@@ -30,6 +30,8 @@ export function GoalEditor({ initialGoal }: { initialGoal: number | null }) {
         throw new Error(body.error ?? "Save failed")
       }
       toast.success(goal === null ? "Goal cleared" : "Goal saved")
+      // router.refresh() keeps client state, so sync the field ourselves.
+      setValue(goal === null ? "" : String(goal))
       setEditing(false)
       router.refresh()
     } catch (err) {

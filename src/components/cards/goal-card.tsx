@@ -7,10 +7,12 @@ const fmt = (n: number) => n.toLocaleString("en-US")
 
 function goalLine(goal: NonNullable<YearProjection["goal"]>) {
   if (goal.status === "met") return "Goal met. Everything from here is bonus."
+  // Word it from `status`, not the rounded %, so a 0.3% gap never reads "0% ahead".
+  const gap = Math.abs(goal.paceVsGoalPct)
   const pace =
-    goal.paceVsGoalPct >= 0
-      ? `${goal.paceVsGoalPct}% ahead of pace`
-      : `${Math.abs(goal.paceVsGoalPct)}% behind pace`
+    goal.status === "behind"
+      ? gap === 0 ? "Just behind pace" : `${gap}% behind pace`
+      : `${gap}% ahead of pace`
   return goal.status === "behind" && goal.neededPerWeek > 0
     ? `${pace} · ${fmt(goal.neededPerWeek)} mi/week to get there`
     : pace

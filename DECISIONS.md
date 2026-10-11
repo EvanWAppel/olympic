@@ -70,5 +70,14 @@ Append-only log of decisions with a real trade-off (chose X, rejected Y, why). N
 - **Migration is additive, and it gets applied to prod before merge.** Migrations here are manual (`pnpm db:migrate`), and `getSettings()` selects every column. If the code deploys first, the dashboard breaks. If the migration lands first, nothing breaks, because the old code ignores the extra column.
 - **The editor is a small client island inside a server card**, reusing the owner-only `PATCH /api/settings`. Rejected: a new goal endpoint, which would duplicate the guard for no gain. Rejected: making the whole card a client component, which would add JS for every anonymous visitor.
 - **Landmarks: pick the one closest in scale (smallest |log ratio|)**, shown as a share when short ("68% of the Appalachian Trail") or a multiple when past it. Rejected "largest landmark not exceeded": it yields flat, big multiples like "2.9× the Camino" where "66% of the AT" reads better. Distances are commonly cited, rounded route lengths, and the list is hand-curated so the owner can edit it.
+- **Review fixes (owner-chosen).**
+  - Ahead/behind wording follows `status`, so a sub-0.5% gap reads "Just behind pace", never "0% ahead".
+  - The editor field resyncs after a clear.
+  - The API goal minimum is 1, matching the UI and avoiding `numeric(6,1)` rounding 0.04 to 0.
+  - Landmarks:
+    - "Britain end to end" is set at a walking-route 1,200 mi instead of the 874 mi road figure.
+    - "a lap of the Earth" replaces "the way around the Earth".
+    - "about as far as X" replaces "the length of X".
+  - The dashboard's data window starts at `trailingYearStart(today)` (never after Jan 1), which fixes a pre-existing leap-year gap where Dec 31 dropped Jan 1 from YTD.
 - **Demo goal 1,500 mi** (not 15 mi/week × 52 = 780), so `/demo` shows an in-progress goal instead of "Goal met".
 

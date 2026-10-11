@@ -68,4 +68,13 @@ describe("<GoalEditor>", () => {
     await user.click(screen.getByRole("button", { name: /save/i }))
     expect(toast.error).toHaveBeenCalledWith("invalid_input")
   })
+
+  it("reopens empty after clearing the goal", async () => {
+    const user = userEvent.setup()
+    render(<GoalEditor initialGoal={1095} />)
+    await user.click(screen.getByRole("button", { name: /edit goal/i }))
+    await user.click(screen.getByRole("button", { name: /clear goal/i }))
+    await user.click(await screen.findByRole("button", { name: /edit goal|set a yearly goal/i }))
+    expect(screen.getByLabelText(/yearly miles goal/i)).toHaveValue(null)
+  })
 })

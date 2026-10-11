@@ -28,3 +28,14 @@ export function daysBetween(fromStr: string, toStr: string): number {
   const to = Date.UTC(ty, tm - 1, td)
   return Math.round((to - from) / 86_400_000)
 }
+
+/**
+ * Start of the dashboard's trailing-year window ending `today`: 364 days back,
+ * but never later than Jan 1, so year-to-date figures stay complete when a
+ * leap year makes Jan 1 fall 365 days back on Dec 31.
+ */
+export function trailingYearStart(today: string): string {
+  const back = addDays(today, -364)
+  const jan1 = `${today.slice(0, 4)}-01-01`
+  return back < jan1 ? back : jan1
+}

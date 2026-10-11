@@ -16,12 +16,16 @@ describe("describeDistance", () => {
   })
 
   it("expresses multiples when past a landmark", () => {
-    // 600 mi: Camino (500) at 1.2× beats Land's End (874) at 0.69×.
+    // 600 mi: Camino (500) at 1.2× beats Britain end to end (1200) at 0.5×.
     expect(describeDistance(600)).toBe("1.2× the Camino de Santiago")
   })
 
-  it("says 'the length of' when it rounds to exactly one", () => {
-    expect(describeDistance(2190)).toBe("the length of the Appalachian Trail")
+  it("says 'about as far as' when within 5% of a landmark", () => {
+    expect(describeDistance(2190)).toBe("about as far as the Appalachian Trail")
+  })
+
+  it("reads naturally for the Earth landmark", () => {
+    expect(describeDistance(12_000)).toBe("48% of a lap of the Earth")
   })
 
   it("uses the smallest landmark for short distances", () => {
