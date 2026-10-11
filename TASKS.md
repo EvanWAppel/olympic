@@ -262,11 +262,11 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 > Depends on **K, L, M** complete and verified on a preview deploy. This is the §12 checklist — do not skip a box.
 
 - [ ] **N1** Audit git history for secrets (`health_ingest_secret`, `DATABASE_URL`, `SESSION_SECRET`, `BOOTSTRAP_REGISTRATION_SECRET`, any `.env`); scrub with `git filter-repo` if found
-- [ ] **N2** Rotate the `health_ingest_secret` to a fresh value; reconfigure Health Auto Export on the phone; confirm next sync lands
+- [ ] **N2** 🔴 _(now urgent: the secret leaked; see BLOCKED.md)_ Rotate the `health_ingest_secret` to a fresh value; reconfigure Health Auto Export on the phone; confirm next sync lands
 - [x] **N3** Replace the default `create-next-app` README with a real one (what/why, agentic-build story, stack, live URL, run instructions) — done in **O1** (screenshot still TODO)
 - [ ] **N4** Add Vercel Firewall / WAF rate limits on `/api/health/ingest`, `/api/auth/login/*`, `/api/auth/register/*`
-- [ ] **N5** Verify on the preview deploy that NO private surface (Settings, ingest secret, write endpoints) is reachable by an anonymous request
-- [ ] **N6** Remove Vercel deployment protection (Settings → Deployment Protection → off) — only after N5 passes and a passkey login is confirmed working in prod
+- [x] **N5** _(2026-10-10, done as incident response: anonymous probes of every private route on a local prod build of `main`, then on prod. All 401/403/307. See DECISIONS.)_ Verify on the preview deploy that NO private surface (Settings, ingest secret, write endpoints) is reachable by an anonymous request
+- [~] **N6** _(2026-10-10: protection was found **off**, which left old v1 deployment URLs leaking the secret. Re-enabled as Vercel Authentication `all_except_custom_domains`, which keeps `olympic.evanappel.me` public and gates every generated deployment URL. This is the intended end state; nothing more to remove.)_ Remove Vercel deployment protection (Settings → Deployment Protection → off) — only after N5 passes and a passkey login is confirmed working in prod
 - [ ] **N7** Smoke-test prod as anonymous (dashboard + `/about` load, links work, resume downloads) and as owner (login → log a workout → it appears)
 - [ ] **N8** Tag commit `v2.0-public`
 
