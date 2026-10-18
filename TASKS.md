@@ -223,12 +223,12 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 - [x] **K13** Test `src/app/api/auth/logout/__tests__/route.test.ts` — calls `clearSessionCookie`, returns `{ ok: true }` (1 test)
 - [x] **K14** Implement `logout/route.ts`
 - [x] **K15** Build `src/app/login/page.tsx` (unadvertised, `robots: noindex`) + `src/components/login-panel.tsx` — passkey login (`startAuthentication`) and a bootstrap-secret-gated register form (`startRegistration`, used by K16), redirect to `/` on success. Test `login-panel.test.tsx` (3 tests, browser lib + fetch mocked). Full suite green (166 tests); prod build compiles all auth routes + `/login`.
-- [~] **K16** Register first passkey (iPhone Face ID) + laptop as 2nd device; verify login round-trips. **In progress.**
+- [x] **K16** Register first passkey (iPhone Face ID) + laptop as 2nd device; verify login round-trips. _(Owner confirmed 2026-10-11.)_
   - [x] Env on Vercel Production+Development: `SESSION_SECRET`, `BOOTSTRAP_REGISTRATION_SECRET`, `RP_ID=olympic.evanappel.me`, `RP_ORIGIN=https://olympic.evanappel.me`
   - [x] Decided permanent domain: **olympic.evanappel.me** (passkey rpID + resume link); attached to project
   - [x] Deployed v2 auth code to Production (additive; still behind deployment protection); aliased to olympic.evanappel.me
   - [x] DNS: moved Wix → Cloudflare; `olympic.evanappel.me` resolves to Vercel and serves HTTPS with a valid cert (verified 2026-10-10)
-  - [ ] Owner steps (iPhone + laptop passkey registration, retire bootstrap secret) are in **`BLOCKED.md`**.
+  - [x] Passkey registration done (2026-10-11). Retiring the bootstrap secret is still in **`BLOCKED.md`**.
 
 ### Group L: Access control & public/private split
 
@@ -261,13 +261,13 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 > Depends on **K, L, M** complete and verified on a preview deploy. This is the §12 checklist — do not skip a box.
 
-- [ ] **N1** Audit git history for secrets (`health_ingest_secret`, `DATABASE_URL`, `SESSION_SECRET`, `BOOTSTRAP_REGISTRATION_SECRET`, any `.env`); scrub with `git filter-repo` if found
+- [x] **N1** _(2026-10-11: clean. No `.env*` file was ever committed. Every secret-shaped match across all refs is a dummy CI/test value (`postgres:postgres@localhost`, `ci-*-not-real`). There were no Neon, Blob, Anthropic, GitHub or AWS token patterns, so no scrub was needed.)_ Audit git history for secrets (`health_ingest_secret`, `DATABASE_URL`, `SESSION_SECRET`, `BOOTSTRAP_REGISTRATION_SECRET`, any `.env`); scrub with `git filter-repo` if found
 - [ ] **N2** 🔴 _(now urgent: the secret leaked; see BLOCKED.md)_ Rotate the `health_ingest_secret` to a fresh value; reconfigure Health Auto Export on the phone; confirm next sync lands
 - [x] **N3** Replace the default `create-next-app` README with a real one (what/why, agentic-build story, stack, live URL, run instructions) — done in **O1** (screenshot still TODO)
 - [ ] **N4** Add Vercel Firewall / WAF rate limits on `/api/health/ingest`, `/api/auth/login/*`, `/api/auth/register/*`
 - [x] **N5** _(2026-10-10, done as incident response: anonymous probes of every private route on a local prod build of `main`, then on prod. All 401/403/307. See DECISIONS.)_ Verify on the preview deploy that NO private surface (Settings, ingest secret, write endpoints) is reachable by an anonymous request
 - [~] **N6** _(2026-10-10: protection was found **off**, which left old v1 deployment URLs leaking the secret. Re-enabled as Vercel Authentication `all_except_custom_domains`, which keeps `olympic.evanappel.me` public and gates every generated deployment URL. This is the intended end state; nothing more to remove.)_ Remove Vercel deployment protection (Settings → Deployment Protection → off) — only after N5 passes and a passkey login is confirmed working in prod
-- [ ] **N7** Smoke-test prod as anonymous (dashboard + `/about` load, links work, resume downloads) and as owner (login → log a workout → it appears)
+- [~] **N7** _(2026-10-11 anonymous half passes via curl: `/`, `/about`, `/resume.pdf`, `/robots.txt`, `/login` return 200; `/settings` returns 307; `/api/settings`, `/api/health/secret`, `/api/export`, `POST /api/workouts`, and keyless `POST /api/health/ingest` return 401. The owner half still needs you.)_ Smoke-test prod as anonymous (dashboard + `/about` load, links work, resume downloads) and as owner (login → log a workout → it appears)
 - [ ] **N8** Tag commit `v2.0-public`
 
 ---
