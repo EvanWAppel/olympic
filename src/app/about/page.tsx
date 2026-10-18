@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArchitectureDiagram } from "@/components/about/architecture-diagram"
 import { getAboutMetrics } from "@/lib/about-metrics"
@@ -140,6 +141,14 @@ export default async function AboutPage() {
           </dl>
         </CardContent>
       </Card>
+
+      <p className="text-sm text-muted-foreground">
+        What has shipped so far:{" "}
+        <Link href="/changelog" className="font-medium underline-offset-4 hover:underline">
+          see the changelog
+        </Link>
+        .
+      </p>
     </main>
   )
 }
