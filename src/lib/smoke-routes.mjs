@@ -145,7 +145,12 @@ export function checkResult(route, observed) {
     } catch {
       // keep the raw value
     }
-    const ok = loc !== "" && target.startsWith(route.location)
+    // Match on a path boundary: "/login" accepts "/login" and "/login/..." but
+    // not "/login-elsewhere"; "/recap/" accepts "/recap/2026".
+    const want = route.location
+    const ok =
+      loc !== "" &&
+      (target === want || target.startsWith(want.endsWith("/") ? want : `${want}/`))
     return {
       ok,
       reason: ok ? `${status} → ${target}` : `${status} → ${loc || "(no location)"}, expected → ${route.location}`,

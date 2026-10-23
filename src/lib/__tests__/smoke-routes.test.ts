@@ -156,6 +156,15 @@ describe("checkResult", () => {
     expect(checkResult(redir, { status: 307, location: "/settings/x" }).ok).toBe(false)
     expect(checkResult(redir, { status: 307 }).ok).toBe(false)
   })
+
+  it("matches the redirect target on a path boundary, not a raw prefix", () => {
+    expect(checkResult(redir, { status: 307, location: "/login?next=%2Fsettings" }).ok).toBe(true)
+    expect(checkResult(redir, { status: 307, location: "/login/" }).ok).toBe(true)
+    expect(checkResult(redir, { status: 307, location: "/login-elsewhere" }).ok).toBe(false)
+    expect(checkResult(redir, { status: 307, location: "/loginx" }).ok).toBe(false)
+    const recap = find("GET", "/recap")[0]
+    expect(checkResult(recap, { status: 307, location: "/recap/2026" }).ok).toBe(true)
+  })
 })
 
 describe("probeRoute", () => {
