@@ -1,7 +1,7 @@
 # Olympic — a long-term movement journal
 
 [![CI](https://github.com/EvanWAppel/olympic/actions/workflows/ci.yml/badge.svg)](https://github.com/EvanWAppel/olympic/actions/workflows/ci.yml)
-![Tests](https://img.shields.io/badge/tests-361%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-363%20passing-brightgreen)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6)
 
@@ -52,7 +52,7 @@ It runs as a single deployment with two faces:
 
 Built with [Claude Code](https://claude.com/claude-code) following a
 **Requirements → Orchestrate → Check → Review → Loop → Ledger** workflow: an interviewed
-[`PRD.md`](./PRD.md) drives a grouped [`TASKS.md`](./TASKS.md); work is test-first (361 tests
+[`PRD.md`](./PRD.md) drives a grouped [`TASKS.md`](./TASKS.md); work is test-first (363 tests
 across unit, DB-integration, and API-route layers); every decision with a real trade-off is
 recorded in [`DECISIONS.md`](./DECISIONS.md); and anything only a human can unblock lands in
 [`BLOCKED.md`](./BLOCKED.md).
