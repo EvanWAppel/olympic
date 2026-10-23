@@ -88,7 +88,8 @@ describe("POST /api/workouts", () => {
   })
 
   it("accepts a row without notes", async () => {
-    const { notes: _ignored, ...rest } = validBody
+    const rest: Partial<typeof validBody> = { ...validBody }
+    delete rest.notes
     const req = new Request("http://localhost/api/workouts", {
       method: "POST",
       headers: { "content-type": "application/json" },
