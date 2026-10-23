@@ -1,0 +1,41 @@
+# Drafted by the 2026-10-24 weekend prep session from the code, README and DECISIONS.md.
+# Not yet verified by olympic's own session. Format: ~/Documents/_system/docs/project-toml.md
+
+[project]
+name = "olympic"
+group = "portfolio"
+kind = "app"
+status = "active"
+repo = "EvanWAppel/olympic"
+visibility = "public"
+on_site = true              # enki data/projects.ts has an "olympic" card (featured)
+verified = false
+
+[deploy]
+host = "vercel"
+services = ["olympic"]      # .vercel/project.json projectName; deploys are manual `vercel --prod`
+domain = "olympic.evanappel.me"
+origin_urls_closed = false  # olympic-lime-six.vercel.app still serves the app (HTTP 200, 2026-10-22);
+                            # generated per-deployment URLs are gated by Vercel Authentication
+                            # (all_except_custom_domains, DECISIONS 2026-10-10)
+
+[auth]
+scheme = "passkeys"         # WebAuthn + jose-signed session cookie; single owner
+access_list = "table:webauthn_credential"
+target = "passkeys"
+
+[data]
+db = "neon"
+
+[demo]
+status = "live"             # dashboard is public read-only by design; /demo shows synthetic data
+url = "https://olympic.evanappel.me/"
+path = "/"
+
+[keys]
+paid = []                   # no LLM key wired; Group T (AI insights) is blocked on the key guardrail
+isolated = "n/a"
+spend_cap = "n/a"
+
+[platform]
+done = []

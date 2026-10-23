@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
+import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "@/components/ui/sonner"
 import { PwaSetup } from "@/components/pwa-setup"
 import { SiteHeader } from "@/components/site-header"
@@ -82,6 +83,9 @@ export default async function RootLayout({
         {children}
         <Toaster richColors position="top-center" />
         <PwaSetup />
+        {/* Vercel Web Analytics (S1): cookieless page views; a no-op until
+            Web Analytics is enabled on the Vercel project. */}
+        <Analytics />
       </body>
     </html>
   )

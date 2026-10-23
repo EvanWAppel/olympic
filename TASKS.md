@@ -223,12 +223,12 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 - [x] **K13** Test `src/app/api/auth/logout/__tests__/route.test.ts` — calls `clearSessionCookie`, returns `{ ok: true }` (1 test)
 - [x] **K14** Implement `logout/route.ts`
 - [x] **K15** Build `src/app/login/page.tsx` (unadvertised, `robots: noindex`) + `src/components/login-panel.tsx` — passkey login (`startAuthentication`) and a bootstrap-secret-gated register form (`startRegistration`, used by K16), redirect to `/` on success. Test `login-panel.test.tsx` (3 tests, browser lib + fetch mocked). Full suite green (166 tests); prod build compiles all auth routes + `/login`.
-- [~] **K16** Register first passkey (iPhone Face ID) + laptop as 2nd device; verify login round-trips. **In progress.**
+- [x] **K16** Register first passkey (iPhone Face ID) + laptop as 2nd device; verify login round-trips. _(Owner confirmed 2026-10-11.)_
   - [x] Env on Vercel Production+Development: `SESSION_SECRET`, `BOOTSTRAP_REGISTRATION_SECRET`, `RP_ID=olympic.evanappel.me`, `RP_ORIGIN=https://olympic.evanappel.me`
   - [x] Decided permanent domain: **olympic.evanappel.me** (passkey rpID + resume link); attached to project
   - [x] Deployed v2 auth code to Production (additive; still behind deployment protection); aliased to olympic.evanappel.me
   - [x] DNS: moved Wix → Cloudflare; `olympic.evanappel.me` resolves to Vercel and serves HTTPS with a valid cert (verified 2026-10-10)
-  - [ ] Owner steps (iPhone + laptop passkey registration, retire bootstrap secret) are in **`BLOCKED.md`**.
+  - [x] Passkey registration done (2026-10-11). Retiring the bootstrap secret is still in **`BLOCKED.md`**.
 
 ### Group L: Access control & public/private split
 
@@ -261,13 +261,13 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 > Depends on **K, L, M** complete and verified on a preview deploy. This is the §12 checklist — do not skip a box.
 
-- [ ] **N1** Audit git history for secrets (`health_ingest_secret`, `DATABASE_URL`, `SESSION_SECRET`, `BOOTSTRAP_REGISTRATION_SECRET`, any `.env`); scrub with `git filter-repo` if found
+- [x] **N1** _(2026-10-11: clean. No `.env*` file was ever committed. Every secret-shaped match across all refs is a dummy CI/test value (`postgres:postgres@localhost`, `ci-*-not-real`). There were no Neon, Blob, Anthropic, GitHub or AWS token patterns, so no scrub was needed.)_ Audit git history for secrets (`health_ingest_secret`, `DATABASE_URL`, `SESSION_SECRET`, `BOOTSTRAP_REGISTRATION_SECRET`, any `.env`); scrub with `git filter-repo` if found
 - [ ] **N2** 🔴 _(now urgent: the secret leaked; see BLOCKED.md)_ Rotate the `health_ingest_secret` to a fresh value; reconfigure Health Auto Export on the phone; confirm next sync lands
 - [x] **N3** Replace the default `create-next-app` README with a real one (what/why, agentic-build story, stack, live URL, run instructions) — done in **O1** (screenshot still TODO)
 - [ ] **N4** Add Vercel Firewall / WAF rate limits on `/api/health/ingest`, `/api/auth/login/*`, `/api/auth/register/*`
 - [x] **N5** _(2026-10-10, done as incident response: anonymous probes of every private route on a local prod build of `main`, then on prod. All 401/403/307. See DECISIONS.)_ Verify on the preview deploy that NO private surface (Settings, ingest secret, write endpoints) is reachable by an anonymous request
 - [~] **N6** _(2026-10-10: protection was found **off**, which left old v1 deployment URLs leaking the secret. Re-enabled as Vercel Authentication `all_except_custom_domains`, which keeps `olympic.evanappel.me` public and gates every generated deployment URL. This is the intended end state; nothing more to remove.)_ Remove Vercel deployment protection (Settings → Deployment Protection → off) — only after N5 passes and a passkey login is confirmed working in prod
-- [ ] **N7** Smoke-test prod as anonymous (dashboard + `/about` load, links work, resume downloads) and as owner (login → log a workout → it appears)
+- [~] **N7** _(2026-10-11 anonymous half passes via curl: `/`, `/about`, `/resume.pdf`, `/robots.txt`, `/login` return 200; `/settings` returns 307; `/api/settings`, `/api/health/secret`, `/api/export`, `POST /api/workouts`, and keyless `POST /api/health/ingest` return 401. The owner half still needs you. 2026-10-24: automated as `node scripts/smoke-anon.mjs <base-url>` (33 probes, route table in `src/lib/smoke-routes.mjs`, unit-tested to cover every app route); passes on a local prod build. Running it against prod is Evan's call.)_ Smoke-test prod as anonymous (dashboard + `/about` load, links work, resume downloads) and as owner (login → log a workout → it appears)
 - [ ] **N8** Tag commit `v2.0-public`
 
 ---
@@ -294,6 +294,7 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
   - ~~Defer the below-the-fold WorkoutList~~ — tried (TBT ~530 → ~450 ms) but **reverted after review**: `ssr:false` dropped the work log from the server HTML. The list stays server-rendered.
   - **Result: Performance 63 → ~83** (LCP 3.0 s, FCP 1.0 s, Speed Index 5.3 → 2.3 s, CLS 0). Local simulated throttling is pessimistic (observed LCP 2.8 s); confirm ≥ 90 on the real CDN-backed deploy. `/about` has no Lighthouse metric to update.
   - _Separately noted:_ a11y dropped 100 → 96 (`color-contrast`) in the earlier **editorial redesign**, not this work — track as its own fix.
+- [x] **P3-a11y** Colour-contrast regression from the editorial redesign. TDD: `src/lib/contrast.ts` (WCAG relative luminance + ratio + a small globals.css parser, unit-tested) and `src/app/__tests__/globals-contrast.test.ts`, which asserts every token text/surface pair the UI uses (and every hard-coded text colour in a rule, against its own fill or every page/card/muted/tinted surface) meets AA 4.5:1; dark tokens are checked too if a `.dark` block is ever added. It failed on `--muted-foreground` (#727569: 4.20 on page, 3.78 on muted), four hard-coded greys (#686e5e, #6c7063, #7b7f71, #737867: down to 3.30) and the track-art caption (#f4edcf on rust: 4.44). Fix keeps the palette's look: `--muted-foreground` → #62655a (≥4.78 everywhere), the four greys now use the token, track-art cream → #fffaf0 (5.01). OG card's `OG_MUTED` synced. _Lighthouse a11y re-check (expect 96 → 100) is Evan's — needs a browser._
 
 ### Group Q: Dynamic OG images + "Year in Movement" recap
 
@@ -310,9 +311,10 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 
 ### Group S: Production-maturity touches
 
-- [ ] **S1** Add Vercel Analytics (Vercel-native — no personal third-party key needed).
+- [~] **S1** _(2026-10-24: code half done. `@vercel/analytics` added and `<Analytics />` (from `@vercel/analytics/next`) renders in `src/app/layout.tsx`, covered by `src/app/__tests__/layout-analytics.test.tsx`. It stays a no-op until Web Analytics is enabled on the Vercel project and a build carrying it is deployed. That half is Evan's; see BLOCKED.md.)_ Add Vercel Analytics (Vercel-native — no personal third-party key needed).
 - [ ] **S2** Error tracking (e.g. Sentry) with source maps. ⚠️ If it uses a key billed to Evan personally, it must clear the §15.4 personal-key guardrail first — record in `BLOCKED.md` if so.
 - [x] **S3** Public `/changelog` listing shipped milestones (v1.0, v2.0-public, v3 features). Hand-curated `src/lib/changelog.ts` (newest first; invariant tests) rendered by `ChangelogView`; linked from `/about`; allowed in `robots.ts`. Add an entry when a milestone ships.
+- [x] **S4** _(2026-10-24)_ Deploy-drift visibility (DECISIONS 2026-10-10 follow-up): build-time git SHA in `next.config.ts`, public `GET /api/version` → `{ commit }`, and `node scripts/check-deploy-drift.mjs <base-url>` (exit 0 in sync / 1 drift / 2 unknown vs `origin/main`). Verified on a local prod build; running it against prod is Evan's call.
 
 ### Group T: AI-powered movement insights — 🔴 BLOCKED (do not start)
 

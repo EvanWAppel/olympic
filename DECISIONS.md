@@ -109,3 +109,13 @@ Six older v1 deployment URLs (`*-evan-appel-s-projects.vercel.app`) served the s
 
 **Decision (owner-approved).** One transaction applied `0002` (CREATE TABLE `daily_mood`) and `0004` (ADD COLUMN `yearly_miles_goal`), inserted their ledger rows (sha256 of each file, as Drizzle does), and moved `0003`'s ledger timestamp to its journal value. A guard rolls the whole thing back unless exactly one `0003` row matches. Verified afterwards: the ledger matches the journal 5/5, and `pnpm db:migrate` is a no-op. Rejected: applying only `0004`, which would have left mood broken and the ledger booby-trapped for the next migration.
 
+## 2026-10-24 — Deploy-drift visibility: public `/api/version` + manual check script (DRAFT, Evan to confirm)
+
+**Context.** The 2026-10-10 incident's root cause was a deploy gap: prod ran a v1 build for months and nothing showed it. The follow-up asked for a way to compare the prod deployment's commit with `main`.
+
+**Decisions.**
+- **Embed the SHA at build time** in `next.config.ts` (`env.BUILD_COMMIT`): `git rev-parse HEAD` first, then `VERCEL_GIT_COMMIT_SHA`, else `"unknown"`. Values that aren't a hex SHA are rejected, so the endpoint can't echo junk. Rejected reading `VERCEL_GIT_COMMIT_SHA` at runtime: it only exists for Git-integrated deploys, and deploys here are CLI `vercel --prod`.
+- **Public `GET /api/version` returns `{ commit }` only, with `Cache-Control: no-store`.** The SHA is already public on GitHub, so this leaks nothing. Rejected owner-gating it: the check has to work anonymously from a laptop or CI, without a passkey.
+- **`scripts/check-deploy-drift.mjs <base-url>` compares that SHA with `git rev-parse origin/main`.** Exit 0 means in sync, 1 means drift, and 2 means it can't tell (unreachable, a pre-`/api/version` build, or no SHA). The logic lives in `src/lib/deploy-drift.mjs` with injectable fetch, so it's unit-tested. Run `git fetch origin` first.
+- **Manual for now, not a scheduled CI job.** A scheduled job against prod is the next step, but it's a publishing/infra decision for Evan. Git-integrated deploys would remove the gap outright and are the stronger fix. Both are left to Evan.
+- **Caveat:** a CLI deploy from a dirty or non-main checkout reports its local HEAD. Drift then shows up as a SHA mismatch, which is the point, but it can't flag uncommitted changes.

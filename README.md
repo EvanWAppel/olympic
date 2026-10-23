@@ -1,7 +1,7 @@
 # Olympic — a long-term movement journal
 
 [![CI](https://github.com/EvanWAppel/olympic/actions/workflows/ci.yml/badge.svg)](https://github.com/EvanWAppel/olympic/actions/workflows/ci.yml)
-![Tests](https://img.shields.io/badge/tests-215%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-363%20passing-brightgreen)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6)
 
@@ -52,7 +52,7 @@ It runs as a single deployment with two faces:
 
 Built with [Claude Code](https://claude.com/claude-code) following a
 **Requirements → Orchestrate → Check → Review → Loop → Ledger** workflow: an interviewed
-[`PRD.md`](./PRD.md) drives a grouped [`TASKS.md`](./TASKS.md); work is test-first (215 tests
+[`PRD.md`](./PRD.md) drives a grouped [`TASKS.md`](./TASKS.md); work is test-first (363 tests
 across unit, DB-integration, and API-route layers); every decision with a real trade-off is
 recorded in [`DECISIONS.md`](./DECISIONS.md); and anything only a human can unblock lands in
 [`BLOCKED.md`](./BLOCKED.md).
@@ -92,6 +92,22 @@ NEON_LOCAL_PROXY_URL='http://localhost:4444/sql' \
 
 docker compose -f docker-compose.test.yml down -v
 ```
+
+### Anonymous smoke probe
+
+`scripts/smoke-anon.mjs` requests every route as an anonymous visitor. Public routes must
+answer 200 (or their expected redirect). Private routes must answer 401, 403 or 307 → `/login`.
+It exits non-zero on any mismatch and flags a private route that answers 2xx as `EXPOSED`.
+The route table lives in [`src/lib/smoke-routes.mjs`](./src/lib/smoke-routes.mjs). A unit test
+walks `src/app` and fails if a page or handler is neither probed nor explicitly exempt.
+
+```bash
+pnpm build && pnpm start          # local prod build (same env as the DB tests)
+node scripts/smoke-anon.mjs http://localhost:3000
+```
+
+Probes send no cookies, and every write probe carries an empty or invalid body, so even a
+missing guard couldn't change data.
 
 Every push and pull request runs `typecheck · lint · test` (full suite) via
 [GitHub Actions](./.github/workflows/ci.yml).
