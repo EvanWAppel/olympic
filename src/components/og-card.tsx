@@ -3,7 +3,7 @@ import type { ReactNode } from "react"
 // Editorial palette (globals.css), inlined because next/og can't read CSS.
 export const OG_INK = "#25291f"
 export const OG_CREAM = "#f4f2eb"
-export const OG_MUTED = "#727569"
+export const OG_MUTED = "#62655a"
 export const OG_RUST = "#bd4228"
 export const OG_BORDER = "#dcded1"
 
