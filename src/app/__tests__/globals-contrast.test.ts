@@ -63,8 +63,9 @@ describe("globals.css colour contrast (WCAG AA)", () => {
       (m) => m[1],
     )
     const surfaces = [light.background, light.card, light.muted, ...tintedSurfaces]
-    // Token colours are covered by TOKEN_PAIRS above; here we check literal hex text colours.
-    const rules = parseCssColorRules(css, light).filter((r) => !r.colorIsToken)
+    // Token-on-surface colours are covered by TOKEN_PAIRS above; here we check literal hex
+    // text colours, plus token text on a rule's own background (TOKEN_PAIRS can't see that).
+    const rules = parseCssColorRules(css, light).filter((r) => !r.colorIsToken || r.background)
 
     it("--muted-foreground on the tinted card fills", () => {
       expect(tintedSurfaces.length).toBeGreaterThan(0)
