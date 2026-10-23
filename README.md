@@ -93,6 +93,22 @@ NEON_LOCAL_PROXY_URL='http://localhost:4444/sql' \
 docker compose -f docker-compose.test.yml down -v
 ```
 
+### Anonymous smoke probe
+
+`scripts/smoke-anon.mjs` requests every route as an anonymous visitor. Public routes must
+answer 200 (or their expected redirect). Private routes must answer 401, 403 or 307 → `/login`.
+It exits non-zero on any mismatch and flags a private route that answers 2xx as `EXPOSED`.
+The route table lives in [`src/lib/smoke-routes.mjs`](./src/lib/smoke-routes.mjs). A unit test
+walks `src/app` and fails if a page or handler is neither probed nor explicitly exempt.
+
+```bash
+pnpm build && pnpm start          # local prod build (same env as the DB tests)
+node scripts/smoke-anon.mjs http://localhost:3000
+```
+
+Probes send no cookies, and every write probe carries an empty or invalid body, so even a
+missing guard couldn't change data.
+
 Every push and pull request runs `typecheck · lint · test` (full suite) via
 [GitHub Actions](./.github/workflows/ci.yml).
 
