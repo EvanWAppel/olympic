@@ -314,6 +314,7 @@ Implementation tasks for [PRD.md](./PRD.md). All work is **TDD**: write the test
 - [ ] **S1** Add Vercel Analytics (Vercel-native — no personal third-party key needed).
 - [ ] **S2** Error tracking (e.g. Sentry) with source maps. ⚠️ If it uses a key billed to Evan personally, it must clear the §15.4 personal-key guardrail first — record in `BLOCKED.md` if so.
 - [x] **S3** Public `/changelog` listing shipped milestones (v1.0, v2.0-public, v3 features). Hand-curated `src/lib/changelog.ts` (newest first; invariant tests) rendered by `ChangelogView`; linked from `/about`; allowed in `robots.ts`. Add an entry when a milestone ships.
+- [x] **S4** _(2026-10-24)_ Deploy-drift visibility (DECISIONS 2026-10-10 follow-up): build-time git SHA in `next.config.ts`, public `GET /api/version` → `{ commit }`, and `node scripts/check-deploy-drift.mjs <base-url>` (exit 0 in sync / 1 drift / 2 unknown vs `origin/main`). Verified on a local prod build; running it against prod is Evan's call.
 
 ### Group T: AI-powered movement insights — 🔴 BLOCKED (do not start)
 
