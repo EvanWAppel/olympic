@@ -23,6 +23,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@simplewebauthn/browser": "^13.3.0",
     "@simplewebauthn/server": "^13.3.2",
+    "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.4.1",
     "adm-zip": "^0.5.17",
     "class-variance-authority": "^0.7.1",
