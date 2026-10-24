@@ -23,8 +23,8 @@ Apple Health data into one dashboard. The same deploy is a public, read-only por
 ### Tasks you can do alone
 
 None queued. All seven weekend tasks merged in PR #31. Everything left in `TASKS.md` is Evan's
-(N2, N4, N8, the N7 owner half, the S1 dashboard switch, the P1 Lighthouse re-run) or is gated by
-`BLOCKED.md` (S2 and Group T on the personal-key guardrail). Check `TASKS.md` and `BLOCKED.md`
+(N2, N4, N8, the N7 owner half, the S1 dashboard switch, the P1 Lighthouse re-run) or needs the
+personal-key guardrail first (S2, and Group T, whose checklist is in `BLOCKED.md`). Check `TASKS.md` and `BLOCKED.md`
 and ask Evan before starting anything new.
 
 Each code task: write the test first, watch it fail, then implement. Before each PR, run
