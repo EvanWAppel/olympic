@@ -6,19 +6,19 @@
 Apple Health data into one dashboard. The same deploy is a public, read-only portfolio piece
 (`olympic.evanappel.me`) and a passkey-gated owner tool.
 
-**Current state (main @ cc1cf41, 2026-10-23).**
+**Current state (main @ 0e4b944, 2026-10-23).**
 - Phases 0–5 are shipped and v2 is live in prod. Phase 6 is done for O, P2/P3, Q, R and S3.
 - The weekend run merged as **PR #31**: ledger sync (K16/N1 done, N7 anonymous half), lint
   warnings cleared, WCAG AA contrast test + token fix, build-time git SHA + `GET /api/version` +
   `scripts/check-deploy-drift.mjs`, `scripts/smoke-anon.mjs`, the S1 code half (`<Analytics />`),
   and the README test-count refresh. Dependabot #11 (TypeScript 6) and #14 (@types/node 26) have
-  since merged too.
+  since merged too, as have #34 (next + eslint-config-next to 16.2.12) and #32 (react +
+  react-dom + types to 19.3). #12, #13 and #15 were closed.
 - Open work: P1 (`[~]`), S1 (`[~]`, dashboard half is Evan's), S2, N2/N4/N6 (`[~]`)/N7 (`[~]`)/N8,
   and Group T, which is blocked.
-- Suite: **363 tests** per the README badge and `acb9357` (PR #31); not re-run for this refresh.
-  CI on main is green (run for `cc1cf41`).
-- Open PRs: dependabot #12, #13, #15 and #32 (react + react-dom + types to 19.3; it supersedes
-  #12). Merge decisions are Evan's; don't redo them.
+- Suite: **363 tests** per the README badge and `acb9357` (PR #31); not re-run for this refresh,
+  and not re-measured on the new deps from #32 and #34. CI on main is green (run for `0e4b944`).
+- Open PRs: none besides this primer refresh. Don't redo the merged dependency bumps.
 
 ### Tasks you can do alone
 
@@ -78,7 +78,7 @@ pnpm typecheck && pnpm lint
 - **Group T** (AI insights): blocked on the four-point key checklist in BLOCKED.md.
 - **P1 / a11y Lighthouse re-runs and the README screenshot.** These need a browser. Ask Evan;
   don't use it unasked.
-- **Dependency PRs #12, #13, #15, #32**: merge decisions are Evan's.
+- **Dependency PRs** (Dependabot or otherwise): merge decisions are Evan's.
 - **Prod DB**: running migrations or any query against it (`pnpm db:migrate`/`db:push` with a
   real `DATABASE_URL`).
 - **Encrypted paths**: none (no `.gitattributes`).
