@@ -39,3 +39,13 @@ spend_cap = "n/a"
 
 [platform]
 done = []
+
+[commands]
+dev = "npm run dev"
+test = "npm run test:run"
+lint = "npm run lint"
+
+[meta]
+description = "Health-tracking app (ingests ResMed/CPAP etc.)"
+language = "node"
+tags = ["portfolio", "demo-mode"]
