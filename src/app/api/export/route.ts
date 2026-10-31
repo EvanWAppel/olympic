@@ -4,6 +4,7 @@ import { db } from "@/db/client"
 import { dailyMetric, workouts } from "@/db/schema"
 import { toCsv } from "@/lib/csv"
 import { requireOwnerOr401 } from "@/lib/api-guard"
+import { requireAccessOr403 } from "@/lib/access"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -34,6 +35,8 @@ const METRIC_COLUMNS = [
 ] as const
 
 export async function GET() {
+  const noAccess = await requireAccessOr403()
+  if (noAccess) return noAccess
   const denied = await requireOwnerOr401()
   if (denied) return denied
 

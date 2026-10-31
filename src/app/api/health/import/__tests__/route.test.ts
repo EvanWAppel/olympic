@@ -8,6 +8,9 @@ import AdmZip from "adm-zip"
 config({ path: ".env.local" })
 
 // Owner-only route: mock the session so the guard sees an authenticated owner.
+// Cloudflare Access is covered by src/app/api/__tests__/access-guard.test.ts;
+// here it always lets the request through so the passkey layer is what is tested.
+vi.mock("@/lib/access", () => ({ requireAccessOr403: vi.fn(async () => null) }))
 vi.mock("@/lib/session", () => ({ getSession: vi.fn() }))
 import { getSession } from "@/lib/session"
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { getSettings, updateSettings } from "@/db/settings.repo"
 import { requireOwnerOr401 } from "@/lib/api-guard"
+import { requireAccessOr403 } from "@/lib/access"
 
 const PatchSchema = z.object({
   weightLb: z.number().positive().max(1000).optional(),
@@ -16,6 +17,8 @@ const PatchSchema = z.object({
 // Owner-only: the settings row carries `health_ingest_secret`, so this must
 // never be public (PRD §6, §9.6).
 export async function GET() {
+  const noAccess = await requireAccessOr403()
+  if (noAccess) return noAccess
   const denied = await requireOwnerOr401()
   if (denied) return denied
 
@@ -24,6 +27,8 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
+  const noAccess = await requireAccessOr403()
+  if (noAccess) return noAccess
   const denied = await requireOwnerOr401()
   if (denied) return denied
 

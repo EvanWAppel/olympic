@@ -40,18 +40,7 @@ export const routeKey = (method, pattern) => `${method} ${pattern}`
  * Routes deliberately not probed, each with the reason.
  * @type {{ method: string, pattern: string, reason: string }[]}
  */
-export const EXEMPT = [
-  {
-    method: "POST",
-    pattern: "/api/auth/login/options",
-    reason: "public by design (starts the passkey login) and writes a challenge row on every call",
-  },
-  {
-    method: "POST",
-    pattern: "/api/auth/login/verify",
-    reason: "public by design (finishes the passkey login); a probe could consume an in-flight owner login's challenge",
-  },
-]
+export const EXEMPT = []
 
 /**
  * The probe table. `now` picks the recap year so the dynamic recap routes hit
@@ -87,7 +76,6 @@ export function smokeRoutes(now = new Date()) {
     pub("GET", "/about"),
     pub("GET", "/changelog"),
     pub("GET", "/demo"),
-    pub("GET", "/login"),
     pub("GET", "/recap", { expect: 307, location: "/recap/", note: "redirects to the newest year" }),
     pub("GET", "/recap/[year]", { path: `/recap/${year}` }),
     pub("GET", "/opengraph-image"),
@@ -98,24 +86,32 @@ export function smokeRoutes(now = new Date()) {
     // Public API.
     pub("GET", "/api/workouts", { note: "public list incl. notes preview (PRD §6)" }),
     pub("GET", "/api/version"),
-    pub("POST", "/api/auth/logout", { note: "clears the caller's own cookie only" }),
 
-    // Private pages.
-    priv("GET", "/settings", 307, { location: "/login" }),
-    // Private API: owner session required.
-    priv("GET", "/api/settings", 401),
-    priv("PATCH", "/api/settings", 401, emptyJson),
-    priv("GET", "/api/health/secret", 401),
-    priv("POST", "/api/health/secret", 401),
-    priv("GET", "/api/export", 401),
+    // Cloudflare Access app (src/lib/access.ts ACCESS_PATHS): without an
+    // Access token the proxy answers 403 before any handler runs. Through
+    // Cloudflare itself, an anonymous request gets a 302 to the Access login.
+    priv("GET", "/login", 403),
+    priv("GET", "/settings", 403),
+    priv("POST", "/api/auth/login/options", 403, emptyJson),
+    priv("POST", "/api/auth/login/verify", 403, emptyJson),
+    priv("POST", "/api/auth/register/options", 403, emptyJson),
+    priv("POST", "/api/auth/register/verify", 403, emptyJson),
+    priv("POST", "/api/auth/logout", 403),
+    priv("GET", "/api/settings", 403),
+    priv("PATCH", "/api/settings", 403, emptyJson),
+    priv("GET", "/api/health/secret", 403),
+    priv("POST", "/api/health/secret", 403),
+    priv("GET", "/api/export", 403),
+    priv("DELETE", "/api/all-data", 403, { note: "no x-confirm-delete header" }),
+    priv("POST", "/api/health/import", 403),
+    priv("POST", "/api/health/blob-upload", 403, emptyJson),
+
+    // Private API outside Access: owner passkey session required.
     priv("POST", "/api/workouts", 401, emptyJson),
     priv("PATCH", "/api/workouts/[id]", 401, { path: `/api/workouts/${NO_SUCH_ID}`, ...emptyJson }),
     priv("DELETE", "/api/workouts/[id]", 401, { path: `/api/workouts/${NO_SUCH_ID}` }),
-    priv("DELETE", "/api/all-data", 401, { note: "no x-confirm-delete header" }),
     priv("GET", "/api/mood", 401),
     priv("POST", "/api/mood", 401, emptyJson),
-    priv("POST", "/api/health/import", 401),
-    priv("POST", "/api/health/blob-upload", 401, emptyJson),
     // Ingest: bearer secret required.
     priv("POST", "/api/health/ingest", 401, { ...emptyJson, note: "no Authorization header" }),
     priv("POST", "/api/health/ingest", 401, {
@@ -123,9 +119,6 @@ export function smokeRoutes(now = new Date()) {
       body: "{}",
       note: "wrong bearer secret",
     }),
-    // Passkey registration: bootstrap secret required.
-    priv("POST", "/api/auth/register/options", 403, emptyJson),
-    priv("POST", "/api/auth/register/verify", 403, emptyJson),
   ]
 }
 

@@ -113,6 +113,8 @@ Deployment protection is all-or-nothing, so v2 **replaces it with route-level ac
 | `/api/export` (CSV) | GET | **Owner** | Full data dump. |
 | `/manifest.json`, service worker, icons | GET | **Public** | PWA install works for anyone. |
 
+> **2026-10-31 (PLAT-AUTH-02):** `/login`, `/settings` and the owner APIs (`/api/auth`, `/api/settings`, `/api/health/secret`, `/api/export`, `/api/all-data`, `/api/health/import`, `/api/health/blob-upload`) now also sit behind a Cloudflare Access app, checked in-app by gatekeeper-ts (`src/proxy.ts` plus each handler). Workout and mood writes stay passkey-only; `/api/health/ingest` stays bearer-only. See DECISIONS.md 2026-10-31.
+
 **Enforcement requirements:**
 - A single server-side `requireOwner()` guard wraps every owner-only route handler; missing/invalid session → `401`/redirect.
 - Public read endpoints use explicit field whitelists (DTOs), not "serialize the whole row," so a future sensitive column can't silently leak.

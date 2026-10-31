@@ -9,6 +9,7 @@ import {
   runSmoke,
   smokeRoutes,
 } from "@/lib/smoke-routes.mjs"
+import { ACCESS_PATHS } from "@/lib/access"
 
 type Route = ReturnType<typeof smokeRoutes>[number]
 
@@ -87,14 +88,15 @@ describe("smokeRoutes table", () => {
   })
 
   it("includes every route the 2026-10-10 incident and N7 named", () => {
-    for (const p of ["/", "/about", "/recap", "/opengraph-image", "/resume.pdf", "/robots.txt", "/login"]) {
+    for (const p of ["/", "/about", "/recap", "/opengraph-image", "/resume.pdf", "/robots.txt"]) {
       expect(find("GET", p).every((r) => r.access === "public")).toBe(true)
       expect(find("GET", p).length).toBeGreaterThan(0)
     }
-    expect(find("GET", "/settings")[0]).toMatchObject({ access: "private", expect: 307 })
-    expect(find("GET", "/api/settings")[0]).toMatchObject({ access: "private", expect: 401 })
-    expect(find("GET", "/api/health/secret")[0]).toMatchObject({ access: "private", expect: 401 })
-    expect(find("GET", "/api/export")[0]).toMatchObject({ access: "private", expect: 401 })
+    expect(find("GET", "/login")[0]).toMatchObject({ access: "private", expect: 403 })
+    expect(find("GET", "/settings")[0]).toMatchObject({ access: "private", expect: 403 })
+    expect(find("GET", "/api/settings")[0]).toMatchObject({ access: "private", expect: 403 })
+    expect(find("GET", "/api/health/secret")[0]).toMatchObject({ access: "private", expect: 403 })
+    expect(find("GET", "/api/export")[0]).toMatchObject({ access: "private", expect: 403 })
     expect(find("POST", "/api/workouts")[0]).toMatchObject({ access: "private", expect: 401 })
     expect(find("POST", "/api/health/ingest").length).toBeGreaterThanOrEqual(2)
     expect(find("POST", "/api/health/ingest").every((r) => r.expect === 401)).toBe(true)
@@ -109,8 +111,11 @@ describe("smokeRoutes table", () => {
     expect(find("GET", "/api/workouts")[0]).toMatchObject({ access: "public", expect: 200 })
   })
 
-  it("redirects anonymous /settings to /login", () => {
-    expect(find("GET", "/settings")[0].location).toBe("/login")
+  it("expects 403 from every route under the Cloudflare Access app (no Access token)", () => {
+    for (const r of routes) {
+      const underAccess = ACCESS_PATHS.some((p) => r.path === p || r.path.startsWith(`${p}/`))
+      if (underAccess) expect(r, routeKey(r.method, r.pattern)).toMatchObject({ access: "private", expect: 403 })
+    }
   })
 
   it("probes the current year's recap", () => {
@@ -169,11 +174,11 @@ describe("checkResult", () => {
 
 describe("probeRoute", () => {
   it("sends the method without following redirects and reports status + location", async () => {
-    const fetchImpl = vi.fn(async () => res(307, "/login"))
-    const route = find("GET", "/settings")[0]
+    const fetchImpl = vi.fn(async () => res(307, "/recap/2026"))
+    const route = find("GET", "/recap")[0]
     const r = await probeRoute("http://localhost:3000/", route, fetchImpl)
     expect(fetchImpl).toHaveBeenCalledWith(
-      "http://localhost:3000/settings",
+      "http://localhost:3000/recap",
       expect.objectContaining({ method: "GET", redirect: "manual" }),
     )
     expect(r).toMatchObject({ ok: true, status: 307 })
