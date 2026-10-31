@@ -5,6 +5,9 @@ import { config } from "dotenv"
 config({ path: ".env.local" })
 
 // Owner-only route (exposes the ingest secret): mock an authenticated session.
+// Cloudflare Access is covered by src/app/api/__tests__/access-guard.test.ts;
+// here it always lets the request through so the passkey layer is what is tested.
+vi.mock("@/lib/access", () => ({ requireAccessOr403: vi.fn(async () => null) }))
 vi.mock("@/lib/session", () => ({ getSession: vi.fn() }))
 import { getSession } from "@/lib/session"
 

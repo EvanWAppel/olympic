@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { requireAccessOr403 } from "@/lib/access"
 import {
   generateRegistrationOptions,
   type AuthenticatorTransportFuture,
@@ -16,6 +17,9 @@ import { listCredentials } from "@/db/credentials.repo"
 export const runtime = "nodejs"
 
 export async function POST(req: Request) {
+  const noAccess = await requireAccessOr403()
+  if (noAccess) return noAccess
+
   const body = await req.json().catch(() => null)
   const secret = extractBootstrapSecret(req, body)
   if (!(await isRegistrationAllowed(secret))) {

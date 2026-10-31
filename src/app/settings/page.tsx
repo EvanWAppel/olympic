@@ -1,8 +1,9 @@
 import Link from "next/link"
-import { redirect } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import type { Metadata } from "next"
 import { getSettings } from "@/db/settings.repo"
 import { getSession } from "@/lib/session"
+import { hasAccess } from "@/lib/access"
 import { SettingsCard } from "@/components/settings-card"
 import { HealthImportCard } from "@/components/health-import-card"
 import { HealthIngestCard } from "@/components/health-ingest-card"
@@ -15,7 +16,9 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = { robots: { index: false, follow: false } }
 
 export default async function SettingsPage() {
-  // Owner-only (PRD §6, §9.6). Anonymous visitors never see the ingest secret.
+  // Cloudflare Access first (the proxy checks too; this covers a proxy miss),
+  // then owner-only (PRD §6, §9.6). Anonymous visitors never see the ingest secret.
+  if (!(await hasAccess())) notFound()
   if (!(await getSession())) redirect("/login")
 
   const s = await getSettings()

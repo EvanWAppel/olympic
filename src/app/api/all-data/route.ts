@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { db } from "@/db/client"
 import { dailyMetric, workouts } from "@/db/schema"
 import { requireOwnerOr401 } from "@/lib/api-guard"
+import { requireAccessOr403 } from "@/lib/access"
 
 export const runtime = "nodejs"
 
@@ -13,6 +14,8 @@ export const CONFIRM_PHRASE = "DELETE ALL DATA"
  * Requires `x-confirm-delete: DELETE ALL DATA` to guard against accidental calls.
  */
 export async function DELETE(req: Request) {
+  const noAccess = await requireAccessOr403()
+  if (noAccess) return noAccess
   const denied = await requireOwnerOr401()
   if (denied) return denied
 

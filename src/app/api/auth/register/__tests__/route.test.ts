@@ -6,6 +6,9 @@ config({ path: ".env.local" })
 
 // Isolate the routes from the DB + session: gating logic is what we assert here.
 // The real cryptographic attestation happy-path is exercised on a device (K16).
+// Cloudflare Access is covered by src/app/api/__tests__/access-guard.test.ts;
+// here it always lets the request through so the passkey layer is what is tested.
+vi.mock("@/lib/access", () => ({ requireAccessOr403: vi.fn(async () => null) }))
 vi.mock("@/lib/session", () => ({
   getSession: vi.fn(),
   setSessionCookie: vi.fn(),

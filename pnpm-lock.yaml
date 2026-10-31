@@ -44,6 +44,9 @@ importers:
       drizzle-orm:
         specifier: ^0.45.2
         version: 0.45.2(@neondatabase/serverless@1.1.0)
+      gatekeeper-ts:
+        specifier: github:EvanWAppel/gatekeeper-ts#5dced3d
+        version: https://codeload.github.com/EvanWAppel/gatekeeper-ts/tar.gz/5dced3d34def2b625c7d894551aa4341685f3074
       idb-keyval:
         specifier: ^6.2.5
         version: 6.2.5
@@ -3082,6 +3085,11 @@ packages:
   fuzzysort@3.1.0:
     resolution: {integrity: sha512-sR9BNCjBg6LNgwvxlBd0sBABvQitkLzoVY9MYYROQVX/FvfJ4Mai9LsGhDgd8qYdds0bY77VzYd5iuB+v5rwQQ==}
 
+  gatekeeper-ts@https://codeload.github.com/EvanWAppel/gatekeeper-ts/tar.gz/5dced3d34def2b625c7d894551aa4341685f3074:
+    resolution: {gitHosted: true, integrity: sha512-Wec3SoAwXZ2tGL3fyCPVNy8bKyPtUzFmfEpSXIeEkbqeeRcJBZJZPOuTaZi2Pb7McGplyBTOku9Umzu04DTxUg==, tarball: https://codeload.github.com/EvanWAppel/gatekeeper-ts/tar.gz/5dced3d34def2b625c7d894551aa4341685f3074}
+    version: 0.1.0
+    engines: {node: '>=20'}
+
   generator-function@2.0.1:
     resolution: {integrity: sha512-SFdFmIJi+ybC0vjlHN0ZGVGHc3lgE0DxPAT0djjVg+kjOnSqclqmj0KQ7ykTOLP6YxoqOvuAODGdcHJn+43q3g==}
     engines: {node: '>= 0.4'}
@@ -3461,6 +3469,9 @@ packages:
 
   jose@5.10.0:
     resolution: {integrity: sha512-s+3Al/p9g32Iq+oqXxkW//7jk2Vig6FF1CFqzVXoTUXt2qz89YWbL+OwS17NFYEvxC35n0FKeGO2LGYSxeM2Gg==}
+
+  jose@6.2.14:
+    resolution: {integrity: sha512-3JasLuki1NRLQvY4wCoC37KZk4qxoBx2k2aFqLxT84IezqW0bkJKnNtxnZj/Fu1xsQivoc/lytxaRHJoGLjJ1A==}
 
   jose@6.2.3:
     resolution: {integrity: sha512-YYVDInQKFJfR/xa3ojUTl8c2KoTwiL1R5Wg9YCydwH0x0B9grbzlg5HC7mMjCtUJjbQ/YnGEZIhI5tCgfTb4Hw==}
@@ -7553,6 +7564,10 @@ snapshots:
 
   fuzzysort@3.1.0: {}
 
+  gatekeeper-ts@https://codeload.github.com/EvanWAppel/gatekeeper-ts/tar.gz/5dced3d34def2b625c7d894551aa4341685f3074:
+    dependencies:
+      jose: 6.2.14
+
   generator-function@2.0.1: {}
 
   gensync@1.0.0-beta.2: {}
@@ -7888,6 +7903,8 @@ snapshots:
   jiti@2.7.0: {}
 
   jose@5.10.0: {}
+
+  jose@6.2.14: {}
 
   jose@6.2.3: {}
 

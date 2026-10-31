@@ -12,6 +12,9 @@ const { deleteMock, returningMock } = vi.hoisted(() => {
   return { deleteMock, returningMock }
 })
 
+// Cloudflare Access is covered by src/app/api/__tests__/access-guard.test.ts;
+// here it always lets the request through so the passkey layer is what is tested.
+vi.mock("@/lib/access", () => ({ requireAccessOr403: vi.fn(async () => null) }))
 vi.mock("@/db/client", () => ({
   db: { delete: deleteMock },
 }))

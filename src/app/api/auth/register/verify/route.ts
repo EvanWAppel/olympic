@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { requireAccessOr403 } from "@/lib/access"
 import { verifyRegistrationResponse } from "@simplewebauthn/server"
 import {
   getRpConfig,
@@ -12,6 +13,9 @@ import { setSessionCookie } from "@/lib/session"
 export const runtime = "nodejs"
 
 export async function POST(req: Request) {
+  const noAccess = await requireAccessOr403()
+  if (noAccess) return noAccess
+
   const body = (await req.json().catch(() => null)) as
     | { response?: unknown; deviceLabel?: unknown }
     | null
