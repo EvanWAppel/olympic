@@ -22,6 +22,7 @@
  *   headers?: Record<string, string>,
  *   body?: string,
  *   note?: string,
+ *   accessGate?: boolean,
  * }} SmokeRoute
  */
 /** @typedef {{ status?: number, location?: string | null }} Observed */
@@ -68,6 +69,8 @@ export function smokeRoutes(now = new Date()) {
     expect,
     ...extra,
   })
+  /** @type {(method: SmokeRoute["method"], pattern: string, extra?: Partial<SmokeRoute>) => SmokeRoute} */
+  const gate = (method, pattern, extra = {}) => priv(method, pattern, 403, { accessGate: true, ...extra })
   const emptyJson = { headers: JSON_HEADERS, body: "{}" }
 
   return [
@@ -89,22 +92,23 @@ export function smokeRoutes(now = new Date()) {
 
     // Cloudflare Access app (src/lib/access.ts ACCESS_PATHS): without an
     // Access token the proxy answers 403 before any handler runs. Through
-    // Cloudflare itself, an anonymous request gets a 302 to the Access login.
-    priv("GET", "/login", 403),
-    priv("GET", "/settings", 403),
-    priv("POST", "/api/auth/login/options", 403, emptyJson),
-    priv("POST", "/api/auth/login/verify", 403, emptyJson),
-    priv("POST", "/api/auth/register/options", 403, emptyJson),
-    priv("POST", "/api/auth/register/verify", 403, emptyJson),
-    priv("POST", "/api/auth/logout", 403),
-    priv("GET", "/api/settings", 403),
-    priv("PATCH", "/api/settings", 403, emptyJson),
-    priv("GET", "/api/health/secret", 403),
-    priv("POST", "/api/health/secret", 403),
-    priv("GET", "/api/export", 403),
-    priv("DELETE", "/api/all-data", 403, { note: "no x-confirm-delete header" }),
-    priv("POST", "/api/health/import", 403),
-    priv("POST", "/api/health/blob-upload", 403, emptyJson),
+    // Cloudflare itself, an anonymous request gets a 302 to the Access login,
+    // which checkResult also accepts for these rows.
+    gate("GET", "/login"),
+    gate("GET", "/settings"),
+    gate("POST", "/api/auth/login/options", emptyJson),
+    gate("POST", "/api/auth/login/verify", emptyJson),
+    gate("POST", "/api/auth/register/options", emptyJson),
+    gate("POST", "/api/auth/register/verify", emptyJson),
+    gate("POST", "/api/auth/logout"),
+    gate("GET", "/api/settings"),
+    gate("PATCH", "/api/settings", emptyJson),
+    gate("GET", "/api/health/secret"),
+    gate("POST", "/api/health/secret"),
+    gate("GET", "/api/export"),
+    gate("DELETE", "/api/all-data", { note: "no x-confirm-delete header" }),
+    gate("POST", "/api/health/import"),
+    gate("POST", "/api/health/blob-upload", emptyJson),
 
     // Private API outside Access: owner passkey session required.
     priv("POST", "/api/workouts", 401, emptyJson),
@@ -123,12 +127,31 @@ export function smokeRoutes(now = new Date()) {
 }
 
 /**
+ * An absolute https URL on a `<team>.cloudflareaccess.com` host.
+ * @param {string | null | undefined} location
+ */
+function isCloudflareAccessLogin(location) {
+  if (!location) return false
+  try {
+    const url = new URL(location)
+    return url.protocol === "https:" && url.hostname.endsWith(".cloudflareaccess.com")
+  } catch {
+    return false
+  }
+}
+
+/**
  * @param {SmokeRoute} route
  * @param {Observed} observed
  * @returns {{ ok: boolean, reason: string }}
  */
 export function checkResult(route, observed) {
   const { status } = observed
+  // Through Cloudflare (the custom domain), an anonymous request to an Access
+  // route never reaches the origin: Access answers with a 302 to its login.
+  if (route.accessGate && status === 302 && isCloudflareAccessLogin(observed.location)) {
+    return { ok: true, reason: "302 → Cloudflare Access login" }
+  }
   if (status === route.expect) {
     if (route.location === undefined) return { ok: true, reason: `${status}` }
     const loc = observed.location ?? ""

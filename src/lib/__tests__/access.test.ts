@@ -71,6 +71,16 @@ describe("requireAccessOr403", () => {
   })
 })
 
+describe("hasAccess", () => {
+  it("is false without a verified Access identity and true with one", async () => {
+    const { hasAccess } = await import("../access")
+    fromHeaders.mockResolvedValueOnce(null)
+    expect(await hasAccess()).toBe(false)
+    fromHeaders.mockResolvedValueOnce({ email: "owner@example.com", subject: "s" })
+    expect(await hasAccess()).toBe(true)
+  })
+})
+
 describe("checkAccessAtStartup", () => {
   it("logs loudly and does not throw when the env is missing", async () => {
     vi.stubEnv("CF_ACCESS_AUD", "")

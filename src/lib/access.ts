@@ -47,11 +47,19 @@ export function getAccessVerifier(): AccessVerifier {
  * carries no valid Access token, or `null` to proceed.
  */
 export async function requireAccessOr403(): Promise<NextResponse | null> {
-  const identity = await getAccessVerifier().fromHeaders(await headers())
-  if (!identity) {
+  if (!(await hasAccess())) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 })
   }
   return null
+}
+
+/**
+ * Whether the current request carries a valid Access token. For server
+ * components under the Access app (e.g. /settings), which can't return a 403
+ * response and so check this and call `notFound()` instead.
+ */
+export async function hasAccess(): Promise<boolean> {
+  return (await getAccessVerifier().fromHeaders(await headers())) !== null
 }
 
 /**

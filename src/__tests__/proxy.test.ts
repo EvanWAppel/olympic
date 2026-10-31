@@ -20,6 +20,10 @@ beforeEach(() => {
 })
 
 describe("proxy matcher", () => {
+  it("is exactly ACCESS_PATHS, nothing more", () => {
+    expect(config.matcher).toEqual(ACCESS_PATHS.map((p) => `${p}/:path*`))
+  })
+
   it.each(ACCESS_PATHS)("guards %s and everything under it", (path) => {
     expect(matches(path)).toBe(true)
     expect(matches(`${path}/x/y`)).toBe(true)

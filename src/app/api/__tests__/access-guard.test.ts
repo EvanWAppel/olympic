@@ -22,6 +22,7 @@ vi.mock("@/lib/session", () => ({
 }))
 
 import { ACCESS_PATHS } from "@/lib/access"
+import { clearSessionCookie, getSession, setSessionCookie } from "@/lib/session"
 
 const API_DIR = path.resolve(__dirname, "..")
 const JSON_BODY = { headers: { "content-type": "application/json" }, body: "{}" }
@@ -49,8 +50,17 @@ describe("route handlers under the Access app", () => {
   it.each(cases)("%s %s refuses without Access even with a passkey session", async (route, method, load) => {
     const handler = await load()
     const init = method === "GET" ? { method } : { method, ...JSON_BODY }
-    const res = await handler(new Request(`http://localhost${route}`, init))
+    vi.mocked(getSession).mockClear()
+    vi.mocked(setSessionCookie).mockClear()
+    vi.mocked(clearSessionCookie).mockClear()
+    const req = new Request(`http://localhost${route}`, init)
+    const res = await handler(req)
     expect(res).toBe(denied)
+    // The Access check runs first: nothing else happened.
+    expect(getSession).not.toHaveBeenCalled()
+    expect(setSessionCookie).not.toHaveBeenCalled()
+    expect(clearSessionCookie).not.toHaveBeenCalled()
+    expect(req.bodyUsed).toBe(false)
   })
 
   /** Every exported handler in every route.ts at or below `dir`. */
@@ -59,7 +69,11 @@ describe("route handlers under the Access app", () => {
       .filter((f) => f.endsWith("route.ts") && !f.includes("__tests__"))
       .map((f) => {
         const src = readFileSync(path.join(dir, f), "utf8")
-        const methods = [...src.matchAll(/export async function (GET|POST|PUT|PATCH|DELETE)\b/g)].map((m) => m[1])
+        const methods = [
+          ...src.matchAll(/export\s+(?:async\s+)?(?:function|const|let|var)\s+(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\b/g),
+        ].map((m) => m[1])
+        // Re-exports (`export { GET } from …`) would dodge the scan above.
+        expect(src, f).not.toMatch(/export\s*\{[^}]*\b(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\b/)
         return { file: path.join(dir, f), methods }
       })
   }
@@ -74,6 +88,14 @@ describe("route handlers under the Access app", () => {
       })
     })
     expect(found.sort()).toEqual(cases.map(([r, m]) => `${r} ${m}`).sort())
+  })
+
+  it.each(["login", "settings"])("the /%s page has no Server Actions (they would bypass the handler checks)", (dir) => {
+    const appDir = path.resolve(API_DIR, "..", dir)
+    for (const f of readdirSync(appDir, { recursive: true, encoding: "utf8" })) {
+      if (!/\.(t|j)sx?$/.test(f)) continue
+      expect(readFileSync(path.join(appDir, f), "utf8"), f).not.toMatch(/["']use server["']/)
+    }
   })
 
   it.each(["health/ingest", "workouts", "mood", "version"])(

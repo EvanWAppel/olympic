@@ -114,8 +114,40 @@ describe("smokeRoutes table", () => {
   it("expects 403 from every route under the Cloudflare Access app (no Access token)", () => {
     for (const r of routes) {
       const underAccess = ACCESS_PATHS.some((p) => r.path === p || r.path.startsWith(`${p}/`))
+      expect(Boolean(r.accessGate), routeKey(r.method, r.pattern)).toBe(underAccess)
       if (underAccess) expect(r, routeKey(r.method, r.pattern)).toMatchObject({ access: "private", expect: 403 })
     }
+  })
+
+  describe("through Cloudflare (the custom domain)", () => {
+    const gated = find("GET", "/settings")[0]
+    const passkeyOnly = find("POST", "/api/workouts")[0]
+
+    it("accepts a 302 to the Cloudflare Access login for an Access route", () => {
+      const loc = "https://some-team.cloudflareaccess.com/cdn-cgi/access/login/olympic.evanappel.me?kid=x"
+      const r = checkResult(gated, { status: 302, location: loc })
+      expect(r).toMatchObject({ ok: true })
+      expect(r.reason).toContain("Cloudflare Access")
+    })
+
+    it("still accepts the origin's own 403", () => {
+      expect(checkResult(gated, { status: 403 }).ok).toBe(true)
+    })
+
+    it.each([
+      ["a lookalike host", "https://cloudflareaccess.com.evil.test/login"],
+      ["a host merely ending in the name", "https://evilcloudflareaccess.com/login"],
+      ["plain http", "http://some-team.cloudflareaccess.com/cdn-cgi/access/login/x"],
+      ["a relative redirect", "/login"],
+      ["no location", ""],
+    ])("rejects a 302 to %s", (_label, location) => {
+      expect(checkResult(gated, { status: 302, location }).ok).toBe(false)
+    })
+
+    it("does not accept an Access redirect for a passkey-only route", () => {
+      const loc = "https://some-team.cloudflareaccess.com/cdn-cgi/access/login/x"
+      expect(checkResult(passkeyOnly, { status: 302, location: loc }).ok).toBe(false)
+    })
   })
 
   it("probes the current year's recap", () => {
